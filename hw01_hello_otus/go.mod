@@ -1,4 +1,4 @@
-module github.com/AZhur771/hw01_hello_otus
+module github.com/AZhur771/otus-go-homework/hw01_hello_otus
 
 go 1.16
 

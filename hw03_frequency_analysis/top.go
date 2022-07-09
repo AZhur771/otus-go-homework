@@ -10,6 +10,7 @@ func normalizeWord(word string) string {
 	word = strings.ToLower(word)
 	pattern := regexp.MustCompile(`[а-яА-Я\w\d-]+`)
 	matched := pattern.FindString(word)
+	// `-` is a special case
 	if matched == "-" {
 		return ""
 	}

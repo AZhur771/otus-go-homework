@@ -75,6 +75,23 @@ func TestCache(t *testing.T) {
 		_, ok = c.Get("ccc")
 		require.False(t, ok)
 	})
+
+	t.Run("pop least recently used values", func(t *testing.T) {
+		c := NewCache(2)
+		c.Set("aaa", 100)
+		c.Set("bbb", 200)
+
+		_, ok := c.Get("aaa")
+		require.True(t, ok)
+
+		_, ok = c.Get("bbb")
+		require.True(t, ok)
+
+		c.Set("ccc", 300)
+
+		_, ok = c.Get("aaa")
+		require.False(t, ok)
+	})
 }
 
 func TestCacheMultithreading(t *testing.T) {

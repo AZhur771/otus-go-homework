@@ -46,6 +46,8 @@ func TestList(t *testing.T) {
 		l.MoveToFront(l.Front()) // [80, 60, 40, 50, 70]
 		l.MoveToFront(l.Back())  // [70, 80, 60, 40, 50]
 
+		require.Equal(t, l.Len(), 5)
+
 		elems := make([]int, 0, l.Len())
 		for i := l.Front(); i != nil; i = i.Next {
 			elems = append(elems, i.Value.(int))

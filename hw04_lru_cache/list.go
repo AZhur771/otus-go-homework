@@ -17,10 +17,9 @@ type ListItem struct {
 }
 
 type list struct {
-	CurrentItem *ListItem
-	FrontItem   *ListItem
-	BackItem    *ListItem
-	Length      int
+	FrontItem *ListItem
+	BackItem  *ListItem
+	Length    int
 }
 
 func (l list) Len() int {
@@ -38,7 +37,6 @@ func (l list) Back() *ListItem {
 func (l *list) fillEmptyList(v interface{}) *ListItem {
 	listItem := ListItem{Value: v}
 	l.FrontItem = &listItem
-	l.CurrentItem = &listItem
 	l.BackItem = &listItem
 	return &listItem
 }

@@ -1,6 +1,7 @@
 package hw06pipelineexecution
 
 import (
+	"runtime"
 	"strconv"
 	"testing"
 	"time"
@@ -56,11 +57,17 @@ func TestPipeline(t *testing.T) {
 		}
 		elapsed := time.Since(start)
 
+		// github actions tests stage may fail because of 2 core CPUs
+		// ~0.8s for processing 5 values in 4 stages (100ms every) concurrently
+		benchmarkTime := float64(int64(sleepPerStage)*int64(len(stages)+len(data)-1) + int64(fault))
+		numCPU := runtime.NumCPU()
+		t.Logf("CPU cores num: %d\n", numCPU)
+		if numCPU <= 2 {
+			benchmarkTime = 1.5 * benchmarkTime
+		}
+
 		require.Equal(t, []string{"102", "104", "106", "108", "110"}, result)
-		require.Less(t,
-			int64(elapsed),
-			// ~0.8s for processing 5 values in 4 stages (100ms every) concurrently
-			int64(sleepPerStage)*int64(len(stages)+len(data)-1)+int64(fault))
+		require.Less(t, int64(elapsed), int64(benchmarkTime))
 	})
 
 	t.Run("done case", func(t *testing.T) {

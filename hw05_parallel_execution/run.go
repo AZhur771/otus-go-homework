@@ -3,6 +3,7 @@ package hw05parallelexecution
 import (
 	"errors"
 	"sync"
+	"sync/atomic"
 )
 
 var ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
@@ -11,20 +12,11 @@ type Task func() error
 
 func Worker(
 	taskChannel chan Task,
-	taskDoneSignal chan struct{},
-	errorSignal chan struct{},
-	abortSignal chan struct{},
+	errorCounter *int32,
 	wg *sync.WaitGroup,
 ) {
 	defer wg.Done()
 	for {
-		// prioritize abortSignal
-		select {
-		case <-abortSignal:
-			return
-		default:
-		}
-
 		select {
 		case task, ok := <-taskChannel:
 			if !ok {
@@ -32,11 +24,8 @@ func Worker(
 			}
 
 			if taskResult := task(); taskResult != nil {
-				errorSignal <- struct{}{}
-			} else {
-				taskDoneSignal <- struct{}{}
+				atomic.AddInt32(errorCounter, 1)
 			}
-		default:
 		}
 	}
 }
@@ -64,43 +53,28 @@ func Run(tasks []Task, n, m int) error {
 
 	wg.Add(n)
 
-	tasksCh := make(chan Task, tasksLength)
-	for _, task := range tasks {
-		tasksCh <- task
-	}
-	close(tasksCh)
-
-	errorCounter := 0 // count errors
-	errorSignal := make(chan struct{}, tasksLength)
-	defer close(errorSignal)
-
-	taskDoneCounter := 0 // count tasks done
-	taskDoneSignal := make(chan struct{}, tasksLength)
-	defer close(taskDoneSignal)
-
-	abortCh := make(chan struct{})
+	tasksCh := make(chan Task)
+	var errorCounter int32
+	errorCounter = 0 // count errors
 
 	for i := 0; i < n; i++ {
-		go Worker(tasksCh, taskDoneSignal, errorSignal, abortCh, &wg)
+		go Worker(tasksCh, &errorCounter, &wg)
 	}
 
-	for {
-		select {
-		case <-taskDoneSignal:
-			taskDoneCounter++
-			// first exit condition
-			if taskDoneCounter == tasksLength {
-				wg.Wait() // allow goroutines finish started tasks
-				return nil
-			}
-		case <-errorSignal:
-			errorCounter++
-			// second exit condition
-			if errorCounter >= m {
-				close(abortCh)
-				wg.Wait() // allow goroutines finish started tasks
-				return ErrErrorsLimitExceeded
-			}
+	for _, task := range tasks {
+		// emergency exit
+		if atomic.LoadInt32(&errorCounter) >= int32(m) {
+			break
 		}
+		tasksCh <- task
 	}
+
+	close(tasksCh)
+	wg.Wait()
+
+	if errorCounter >= int32(m) {
+		return ErrErrorsLimitExceeded
+	}
+
+	return nil
 }

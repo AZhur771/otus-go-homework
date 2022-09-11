@@ -38,23 +38,27 @@ func formEnvString(env Environment) []string {
 
 // RunCmd runs a command + arguments (cmd) with environment variables from env.
 func RunCmd(cmd []string, env Environment) (returnCode int) {
+	//nolint:gosec
 	command := exec.Command(cmd[0], cmd[1:]...)
 
+	stdin := os.Stdin
 	stdout := os.Stdout
 	stderr := os.Stderr
 
+	command.Stdin = stdin
 	command.Stdout = stdout
 	command.Stderr = stderr
 
 	command.Env = formEnvString(env)
 
 	if err := command.Run(); err != nil {
+		//nolint:errorlint // Errors.As requires non-nil pointer which is not possible here
 		if exitError, ok := err.(*exec.ExitError); ok {
-			return exitError.ExitCode()
+			returnCode = exitError.ExitCode()
 		} else {
-			return defaultErrorCode
+			returnCode = defaultErrorCode
 		}
 	}
 
-	return 0
+	return
 }

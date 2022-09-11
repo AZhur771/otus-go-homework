@@ -19,9 +19,12 @@ type EnvValue struct {
 var ErrInvalidFile = errors.New("invalid file")
 
 func getFileContent(b []byte) (string, error) {
-	bytesPreprocessed := bytes.Replace(b, []byte{0x00}, []byte{0x0A}, -1)
-	str := string(bytesPreprocessed)
-	str = strings.Split(str, "\n")[0]
+	newLineIndex := bytes.IndexByte(b, 0x0A)
+	if newLineIndex != -1 {
+		b = b[0:newLineIndex]
+	}
+	b = bytes.ReplaceAll(b, []byte{0x00}, []byte{0x0A})
+	str := string(b)
 	str = strings.TrimRight(str, "\n\t ")
 
 	if strings.Contains(str, "=") {
@@ -42,6 +45,10 @@ func ReadDir(dir string) (Environment, error) {
 	}
 
 	for _, file := range fileNames {
+		if file.IsDir() {
+			continue
+		}
+
 		fileName := file.Name()
 		b, err := os.ReadFile(path.Join(dir, fileName))
 		if err != nil {
@@ -57,7 +64,6 @@ func ReadDir(dir string) (Environment, error) {
 			Value:      str,
 			NeedRemove: len(str) == 0,
 		}
-
 	}
 
 	return env, nil

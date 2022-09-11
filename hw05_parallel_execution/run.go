@@ -16,16 +16,9 @@ func Worker(
 	wg *sync.WaitGroup,
 ) {
 	defer wg.Done()
-	for {
-		select {
-		case task, ok := <-taskChannel:
-			if !ok {
-				return
-			}
-
-			if taskResult := task(); taskResult != nil {
-				atomic.AddInt32(errorCounter, 1)
-			}
+	for task := range taskChannel {
+		if taskResult := task(); taskResult != nil {
+			atomic.AddInt32(errorCounter, 1)
 		}
 	}
 }
@@ -42,11 +35,9 @@ func Run(tasks []Task, n, m int) error {
 		m = 1
 	}
 
-	tasksLength := len(tasks)
-
 	// if there are fewer tasks than goroutines, then use fewer goroutines
-	if tasksLength < n {
-		n = tasksLength
+	if len(tasks) < n {
+		n = len(tasks)
 	}
 
 	var wg sync.WaitGroup
@@ -54,8 +45,7 @@ func Run(tasks []Task, n, m int) error {
 	wg.Add(n)
 
 	tasksCh := make(chan Task)
-	var errorCounter int32
-	errorCounter = 0 // count errors
+	errorCounter := int32(0) // count errors
 
 	for i := 0; i < n; i++ {
 		go Worker(tasksCh, &errorCounter, &wg)

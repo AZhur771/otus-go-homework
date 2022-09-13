@@ -67,6 +67,6 @@ func TestFailReadDir(t *testing.T) {
 		tmpFile.WriteString("foo=bar")
 
 		_, err = ReadDir(dirName)
-		require.ErrorIs(t, ErrInvalidFile, err)
+		require.ErrorIs(t, err, ErrInvalidFile)
 	})
 }

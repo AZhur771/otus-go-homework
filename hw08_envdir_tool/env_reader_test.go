@@ -49,7 +49,9 @@ func TestReadDir(t *testing.T) {
 			require.Equal(t, resultV.Value, v.Value)
 		}
 	})
+}
 
+func TestFailReadDir(t *testing.T) {
 	t.Run("Fail read env variables from env2 dir", func(t *testing.T) {
 		dirName, err := ioutil.TempDir("", "test")
 		defer os.RemoveAll(dirName)

@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"os"
 	"path"
 	"strings"
@@ -41,7 +42,7 @@ func ReadDir(dir string) (Environment, error) {
 
 	fileNames, err := os.ReadDir(dir)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read from dir %s: %w", dir, err)
 	}
 
 	for _, file := range fileNames {
@@ -50,14 +51,15 @@ func ReadDir(dir string) (Environment, error) {
 		}
 
 		fileName := file.Name()
-		b, err := os.ReadFile(path.Join(dir, fileName))
+		filePath := path.Join(dir, fileName)
+		b, err := os.ReadFile(filePath)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to read from file %s: %w", filePath, err)
 		}
 
 		str, err := getFileContent(b)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to parse file content %w", err)
 		}
 
 		env[fileName] = EnvValue{

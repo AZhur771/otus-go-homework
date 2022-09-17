@@ -1,12 +1,14 @@
 package hw10programoptimization
 
 import (
-	"encoding/json"
+	"bufio"
+	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"regexp"
 	"strings"
+
+	"github.com/mailru/easyjson"
 )
 
 type User struct {
@@ -21,41 +23,40 @@ type User struct {
 
 type DomainStat map[string]int
 
+func ScanLines(data []byte, atEOF bool) (advance int, token []byte, err error) {
+	if atEOF && len(data) == 0 {
+		return 0, nil, nil
+	}
+
+	if i := bytes.IndexByte(data, '\n'); i >= 0 {
+		return i + 1, data[0:i], nil
+	}
+
+	if atEOF {
+		return len(data), data, nil
+	}
+
+	return 0, nil, nil
+}
+
 func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
-	u, err := getUsers(r)
-	if err != nil {
-		return nil, fmt.Errorf("get users error: %w", err)
-	}
-	return countDomains(u, domain)
-}
-
-type users [100_000]User
-
-func getUsers(r io.Reader) (result users, err error) {
-	content, err := ioutil.ReadAll(r)
-	if err != nil {
-		return
-	}
-
-	lines := strings.Split(string(content), "\n")
-	for i, line := range lines {
-		var user User
-		if err = json.Unmarshal([]byte(line), &user); err != nil {
-			return
-		}
-		result[i] = user
-	}
-	return
-}
-
-func countDomains(u users, domain string) (DomainStat, error) {
 	result := make(DomainStat)
 
-	for _, user := range u {
-		matched, err := regexp.Match("\\."+domain, []byte(user.Email))
-		if err != nil {
-			return nil, err
+	re, err := regexp.Compile("\\." + domain)
+	if err != nil {
+		return nil, err
+	}
+
+	bytesScanner := bufio.NewScanner(r)
+	bytesScanner.Split(ScanLines)
+	for bytesScanner.Scan() {
+		var user User
+
+		if err := easyjson.Unmarshal(bytesScanner.Bytes(), &user); err != nil {
+			return nil, fmt.Errorf("get users error: %w", err)
 		}
+
+		matched := re.Match([]byte(user.Email))
 
 		if matched {
 			num := result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])]
@@ -63,5 +64,6 @@ func countDomains(u users, domain string) (DomainStat, error) {
 			result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])] = num
 		}
 	}
+
 	return result, nil
 }

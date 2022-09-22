@@ -3,6 +3,7 @@
 package hw10programoptimization
 
 import (
+	"bufio"
 	"bytes"
 	"testing"
 
@@ -35,5 +36,21 @@ func TestGetDomainStat(t *testing.T) {
 		result, err := GetDomainStat(bytes.NewBufferString(data), "unknown")
 		require.NoError(t, err)
 		require.Equal(t, DomainStat{}, result)
+	})
+}
+
+func TestScanLines(t *testing.T) {
+	t.Run("correctly splits byte slice by \\n", func(t *testing.T) {
+		r := bytes.NewReader([]byte{'s', 'o', 'm', 'e', '\n', 's', 't', 'r', 'i', 'n', 'g'})
+		bytesScanner := bufio.NewScanner(r)
+		bytesScanner.Split(ScanLines)
+		hasMore := bytesScanner.Scan()
+		require.True(t, hasMore)
+		require.Equal(t, "some", bytesScanner.Text())
+		hasMore = bytesScanner.Scan()
+		require.True(t, hasMore)
+		require.Equal(t, "string", bytesScanner.Text())
+		hasMore = bytesScanner.Scan()
+		require.False(t, hasMore)
 	})
 }

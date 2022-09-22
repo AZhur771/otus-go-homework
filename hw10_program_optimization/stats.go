@@ -53,7 +53,8 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 		matched := strings.HasSuffix(user.Email, "."+domain)
 
 		if matched {
-			result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])] = result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])] + 1
+			resultKey := strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])
+			result[resultKey]++
 		}
 	}
 

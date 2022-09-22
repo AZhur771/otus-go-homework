@@ -48,18 +48,13 @@ func (v StringValidator) ValidateRegexp(value string, re *regexp.Regexp) (bool, 
 }
 
 func (v StringValidator) ValidateIn(value string, in []string) (bool, error) {
-	inContainsValue := false
 	for _, v := range in {
 		if v == value {
-			inContainsValue = true
+			return true, nil
 		}
 	}
 
-	if !inContainsValue {
-		return false, fmt.Errorf("value should be in %v: %w", in, ErrFieldNotValid)
-	}
-
-	return true, nil
+	return false, fmt.Errorf("value should be in %v: %w", in, ErrFieldNotValid)
 }
 
 // NumberValidator (min/max/in).
@@ -82,18 +77,13 @@ func (v NumberValidator) ValidateMax(value int, max int) (bool, error) {
 }
 
 func (v NumberValidator) ValidateIn(value int, in []int) (bool, error) {
-	inContainsValue := false
 	for _, v := range in {
 		if v == value {
-			inContainsValue = true
+			return true, nil
 		}
 	}
 
-	if !inContainsValue {
-		return false, fmt.Errorf("value should be in %v: %w", in, ErrFieldNotValid)
-	}
-
-	return true, nil
+	return false, fmt.Errorf("value should be in %v: %w", in, ErrFieldNotValid)
 }
 
 func validateString(tag string, fieldName string, fieldValue reflect.Value) (bool, error) {

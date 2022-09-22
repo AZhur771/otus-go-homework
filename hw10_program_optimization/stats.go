@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"regexp"
 	"strings"
 
 	"github.com/mailru/easyjson"
@@ -42,11 +41,6 @@ func ScanLines(data []byte, atEOF bool) (advance int, token []byte, err error) {
 func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 	result := make(DomainStat)
 
-	re, err := regexp.Compile("\\." + domain)
-	if err != nil {
-		return nil, err
-	}
-
 	bytesScanner := bufio.NewScanner(r)
 	bytesScanner.Split(ScanLines)
 	for bytesScanner.Scan() {
@@ -56,12 +50,10 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 			return nil, fmt.Errorf("get users error: %w", err)
 		}
 
-		matched := re.Match([]byte(user.Email))
+		matched := strings.HasSuffix(user.Email, "."+domain)
 
 		if matched {
-			num := result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])]
-			num++
-			result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])] = num
+			result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])] = result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])] + 1
 		}
 	}
 

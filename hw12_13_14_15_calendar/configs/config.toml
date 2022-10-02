@@ -1,5 +1,20 @@
-[logger]
-level = "INFO"
+# Example config
 
-# TODO
-# ...
+[logger]
+level = "info"
+
+[server]
+host = "localhost"
+port = 3000
+shutdown_timeout = 3000
+
+[database]
+inmemory_storage = true
+host = "localhost"
+port = 5432
+username = 'postgres'
+password = 'postgres'
+db_name = 'calendar'
+ssl_mode = 'disable'
+db_timeout = 3000
+

@@ -3,21 +3,37 @@ package main
 import (
 	"context"
 	"flag"
+	"io"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/app"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
-	internalhttp "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/memory"
+	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/app"
+	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/logger"
+	internalhttp "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/server/http"
+	inmemorystorage "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/storage/memory"
+	sqlstorage "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/storage/sql"
+	"github.com/pelletier/go-toml"
 )
 
 var configFile string
 
 func init() {
 	flag.StringVar(&configFile, "config", "/etc/calendar/config.toml", "Path to configuration file")
+}
+
+func getStorage(dbConf DatabaseConf) (app.Storage, error) {
+	if dbConf.InMemoryStorage {
+		return inmemorystorage.New(), nil
+	} else {
+		storage := sqlstorage.New()
+		ctx := context.Background()
+		err := storage.Connect(ctx, dbConf.Host,
+			dbConf.Port, dbConf.Username, dbConf.Password, dbConf.DBName, dbConf.SslMode)
+		return storage, err
+	}
 }
 
 func main() {
@@ -29,12 +45,33 @@ func main() {
 	}
 
 	config := NewConfig()
+
+	f, err := os.Open(configFile)
+	if err != nil {
+		log.Fatalf("error while open config file %s: %v\n", configFile, err)
+	}
+	defer f.Close()
+
+	b, err := io.ReadAll(f)
+	if err != nil {
+		log.Fatalf("error while read config file %s: %v\n", configFile, err)
+	}
+
+	err = toml.Unmarshal(b, &config)
+	if err != nil {
+		log.Fatalf("error while unmarshal config file %s: %v\n", configFile, err)
+	}
+
+	storage, err := getStorage(config.Database)
+	if err != nil {
+		log.Fatalf("error while getting storage: %v\n", err)
+	}
+
 	logg := logger.New(config.Logger.Level)
 
-	storage := memorystorage.New()
 	calendar := app.New(logg, storage)
 
-	server := internalhttp.NewServer(logg, calendar)
+	server := internalhttp.NewServer(logg, calendar, config.Server.Host, config.Server.Port)
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
@@ -43,7 +80,7 @@ func main() {
 	go func() {
 		<-ctx.Done()
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+		ctx, cancel := context.WithTimeout(context.Background(), config.Server.ShutdownTimeout*time.Millisecond)
 		defer cancel()
 
 		if err := server.Stop(ctx); err != nil {

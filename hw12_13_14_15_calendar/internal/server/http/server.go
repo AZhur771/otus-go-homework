@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 )
 
 type Server struct {
@@ -31,8 +32,9 @@ func NewServer(logger Logger, app Application, host string, port int) *Server {
 	mux.Handle("/", loggingMiddleware(http.HandlerFunc(HelloWorldHandler), logger))
 
 	server := &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", host, port),
-		Handler: mux,
+		Addr:              fmt.Sprintf("%s:%d", host, port),
+		Handler:           mux,
+		ReadHeaderTimeout: 2 * time.Second,
 	}
 
 	return &Server{

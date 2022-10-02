@@ -9,9 +9,9 @@ type Level string
 
 const (
 	Debug Level = "debug"
-	Info        = "info"
-	Warn        = "warn"
-	Error       = "error"
+	Info  Level = "info"
+	Warn  Level = "warn"
+	Error Level = "error"
 )
 
 var (

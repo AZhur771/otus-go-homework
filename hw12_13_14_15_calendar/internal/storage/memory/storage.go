@@ -2,14 +2,14 @@ package memorystorage
 
 import (
 	"errors"
-	"github.com/google/uuid"
 	"sync"
 	"time"
 
 	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/storage"
+	"github.com/google/uuid"
 )
 
-var NoEventFoundErr = errors.New("event not found error")
+var ErrNoEventFound = errors.New("event not found error")
 
 type Storage struct {
 	mu     sync.RWMutex
@@ -18,7 +18,7 @@ type Storage struct {
 
 func New() *Storage {
 	return &Storage{
-		mu:     *new(sync.RWMutex),
+		mu:     sync.RWMutex{},
 		events: make([]storage.Event, 0),
 	}
 }
@@ -35,7 +35,7 @@ func getEventAndEventIdx(id uuid.UUID, events []storage.Event) (storage.Event, i
 	}
 
 	if eventIdx == -1 {
-		return event, eventIdx, NoEventFoundErr
+		return event, eventIdx, ErrNoEventFound
 	}
 
 	return event, eventIdx, nil
@@ -62,11 +62,11 @@ func (s *Storage) DeleteEvent(id uuid.UUID) (storage.Event, error) {
 	return event, nil
 }
 
-func (s *Storage) UpdateEventByID(id uuid.UUID, event storage.Event) (storage.Event, error) {
+func (s *Storage) UpdateEventByID(event storage.Event) (storage.Event, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	_, eventIdx, err := getEventAndEventIdx(id, s.events)
+	_, eventIdx, err := getEventAndEventIdx(event.ID, s.events)
 	if err != nil {
 		return event, err
 	}

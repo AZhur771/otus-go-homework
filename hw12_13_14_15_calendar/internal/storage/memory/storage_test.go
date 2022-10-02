@@ -25,7 +25,7 @@ func generateDummyEvent(title string, desc string, addToDate time.Duration) (eve
 		return
 	}
 
-	dummyDate := time.Date(2022, 01, 01, 0, 0, 0, 0, location)
+	dummyDate := time.Date(2022, 0o1, 0o1, 0, 0, 0, 0, location)
 
 	event = storage.Event{
 		ID:                 UUID,
@@ -73,7 +73,7 @@ func TestStorage(t *testing.T) {
 			NotificationPeriod: event.NotificationPeriod,
 		}
 
-		_, err = s.UpdateEventByID(updatedEvent.ID, updatedEvent)
+		_, err = s.UpdateEventByID(updatedEvent)
 		require.NoError(t, err)
 
 		require.Equal(t, 1, len(s.events))

@@ -2,10 +2,11 @@ package internalhttp
 
 import (
 	"fmt"
-	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/app"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/app"
 )
 
 type responseObserver struct {
@@ -38,7 +39,7 @@ func loggingMiddleware(next http.Handler, logg app.Logger) http.Handler {
 		requestAccepted := time.Now()
 		o := &responseObserver{ResponseWriter: w}
 		next.ServeHTTP(o, r)
-		latency := time.Now().Sub(requestAccepted)
+		latency := time.Since(requestAccepted)
 		addr := r.RemoteAddr
 		if i := strings.LastIndex(addr, ":"); i != -1 {
 			addr = addr[:i]

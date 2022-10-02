@@ -3,18 +3,18 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/app"
 	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/server/http"
 	inmemorystorage "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/storage/memory"
 	sqlstorage "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/storage/sql"
+	_ "github.com/lib/pq"
 	"github.com/pelletier/go-toml"
 )
 
@@ -27,13 +27,14 @@ func init() {
 func getStorage(dbConf DatabaseConf) (app.Storage, error) {
 	if dbConf.InMemoryStorage {
 		return inmemorystorage.New(), nil
-	} else {
-		storage := sqlstorage.New()
-		ctx := context.Background()
-		err := storage.Connect(ctx, dbConf.Host,
-			dbConf.Port, dbConf.Username, dbConf.Password, dbConf.DBName, dbConf.SslMode)
-		return storage, err
 	}
+
+	storage := sqlstorage.New()
+	ctx := context.Background()
+	datasource := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+		dbConf.Host, dbConf.Port, dbConf.Username, dbConf.Password, dbConf.DBName, dbConf.SslMode)
+	err := storage.Connect(ctx, datasource)
+	return storage, err
 }
 
 func main() {
@@ -48,23 +49,27 @@ func main() {
 
 	f, err := os.Open(configFile)
 	if err != nil {
-		log.Fatalf("error while open config file %s: %v\n", configFile, err)
+		fmt.Printf("error while open config file %s: %v\n", configFile, err)
+		return
 	}
 	defer f.Close()
 
 	b, err := io.ReadAll(f)
 	if err != nil {
-		log.Fatalf("error while read config file %s: %v\n", configFile, err)
+		fmt.Printf("error while read config file %s: %v\n", configFile, err)
+		return
 	}
 
 	err = toml.Unmarshal(b, &config)
 	if err != nil {
-		log.Fatalf("error while unmarshal config file %s: %v\n", configFile, err)
+		fmt.Printf("error while unmarshal config file %s: %v\n", configFile, err)
+		return
 	}
 
 	storage, err := getStorage(config.Database)
 	if err != nil {
-		log.Fatalf("error while getting storage: %v\n", err)
+		fmt.Printf("error while getting storage: %v\n", err)
+		return
 	}
 
 	logg := logger.New(config.Logger.Level)
@@ -80,7 +85,7 @@ func main() {
 	go func() {
 		<-ctx.Done()
 
-		ctx, cancel := context.WithTimeout(context.Background(), config.Server.ShutdownTimeout*time.Millisecond)
+		ctx, cancel := context.WithTimeout(context.Background(), config.Server.ShutdownTimeout)
 		defer cancel()
 
 		if err := server.Stop(ctx); err != nil {

@@ -23,7 +23,7 @@ type Logger interface {
 type Storage interface {
 	AddEvent(event storage.Event) (storage.Event, error)
 	DeleteEvent(id uuid.UUID) (storage.Event, error)
-	UpdateEventByID(id uuid.UUID, event storage.Event) (storage.Event, error)
+	UpdateEventByID(event storage.Event) (storage.Event, error)
 	GetEventByID(id uuid.UUID) (storage.Event, error)
 	GetEvents() ([]storage.Event, error)
 	GetEventsForPeriod(dateStart time.Time, duration time.Duration) ([]storage.Event, error)

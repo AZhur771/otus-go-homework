@@ -15,7 +15,7 @@ import (
 	inmemorystorage "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/storage/memory"
 	sqlstorage "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/storage/sql"
 	_ "github.com/lib/pq"
-	"github.com/pelletier/go-toml"
+	toml "github.com/pelletier/go-toml"
 )
 
 var configFile string

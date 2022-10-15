@@ -3,15 +3,15 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/app"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
-	internalhttp "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/memory"
+	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/app"
+	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/logger"
+	internalhttp "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/server/http"
+	_ "github.com/lib/pq"
 )
 
 var configFile string
@@ -28,13 +28,23 @@ func main() {
 		return
 	}
 
-	config := NewConfig()
+	config, err := getConfig(configFile)
+	if err != nil {
+		fmt.Printf("error while getting config: %v\n", err)
+		return
+	}
+
+	storage, err := getStorage(config.Database)
+	if err != nil {
+		fmt.Printf("error while getting storage: %v\n", err)
+		return
+	}
+
 	logg := logger.New(config.Logger.Level)
 
-	storage := memorystorage.New()
 	calendar := app.New(logg, storage)
 
-	server := internalhttp.NewServer(logg, calendar)
+	server := internalhttp.NewServer(logg, calendar, config.Server.Host, config.Server.Port)
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
@@ -43,7 +53,7 @@ func main() {
 	go func() {
 		<-ctx.Done()
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+		ctx, cancel := context.WithTimeout(context.Background(), config.Server.ShutdownTimeout)
 		defer cancel()
 
 		if err := server.Stop(ctx); err != nil {
@@ -51,7 +61,7 @@ func main() {
 		}
 	}()
 
-	logg.Info("calendar is running...")
+	logg.Info(fmt.Sprintf("calendar is running on http://%s:%d", config.Server.Host, config.Server.Port))
 
 	if err := server.Start(ctx); err != nil {
 		logg.Error("failed to start http server: " + err.Error())

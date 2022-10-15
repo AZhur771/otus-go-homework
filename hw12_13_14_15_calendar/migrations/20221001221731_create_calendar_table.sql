@@ -1,15 +1,15 @@
 -- +goose Up
 CREATE TABLE users (
    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-   username VARCHAR(100) NOT NULL
+   username text NOT NULL
 );
 
 CREATE TABLE events (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    title VARCHAR(255) NOT NULL,
+    title text NOT NULL,
     date_start TIMESTAMP NOT NULL,
     duration INTERVAL NOT NULL,
-    description VARCHAR(255) NOT NULL,
+    description text NOT NULL,
     user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     notification_period INTERVAL NOT NULL
 );

@@ -26,14 +26,15 @@ type ServerConf struct {
 }
 
 type DatabaseConf struct {
-	InMemoryStorage bool   `toml:"inmemory_storage"`
-	DBTimeout       int    `toml:"db_timeout"`
-	Host            string `toml:"host"`
-	Port            int    `toml:"port"`
-	Username        string `toml:"username"`
-	Password        string `toml:"password"`
-	DBName          string `toml:"db_name"`
-	SslMode         string `toml:"ssl_mode"`
+	MemoryStorage  string `toml:"memory_storage"`
+	DBTimeout      int    `toml:"db_timeout"`
+	MaxConnections int    `toml:"max_connections"`
+	Host           string `toml:"host"`
+	Port           int    `toml:"port"`
+	Username       string `toml:"username"`
+	Password       string `toml:"password"`
+	DBName         string `toml:"db_name"`
+	SslMode        string `toml:"ssl_mode"`
 }
 
 func NewConfig() Config {

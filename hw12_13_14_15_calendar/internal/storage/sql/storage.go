@@ -17,11 +17,11 @@ func New() *Storage {
 	return &Storage{}
 }
 
-func (s *Storage) Connect(ctx context.Context, datasource string) error {
+func (s *Storage) Connect(ctx context.Context, datasource string, maxConnections int) error {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 	db, err := sqlx.ConnectContext(ctx, "postgres", datasource)
-	db.SetMaxOpenConns(5)
+	db.SetMaxOpenConns(maxConnections)
 	s.db = db
 	return err
 }

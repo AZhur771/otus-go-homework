@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,29 +11,13 @@ import (
 	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/app"
 	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/server/http"
-	inmemorystorage "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/storage/memory"
-	sqlstorage "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/storage/sql"
 	_ "github.com/lib/pq"
-	toml "github.com/pelletier/go-toml"
 )
 
 var configFile string
 
 func init() {
 	flag.StringVar(&configFile, "config", "/etc/calendar/config.toml", "Path to configuration file")
-}
-
-func getStorage(dbConf DatabaseConf) (app.Storage, error) {
-	if dbConf.InMemoryStorage {
-		return inmemorystorage.New(), nil
-	}
-
-	storage := sqlstorage.New()
-	ctx := context.Background()
-	datasource := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-		dbConf.Host, dbConf.Port, dbConf.Username, dbConf.Password, dbConf.DBName, dbConf.SslMode)
-	err := storage.Connect(ctx, datasource)
-	return storage, err
 }
 
 func main() {
@@ -45,24 +28,9 @@ func main() {
 		return
 	}
 
-	config := NewConfig()
-
-	f, err := os.Open(configFile)
+	config, err := getConfig(configFile)
 	if err != nil {
-		fmt.Printf("error while open config file %s: %v\n", configFile, err)
-		return
-	}
-	defer f.Close()
-
-	b, err := io.ReadAll(f)
-	if err != nil {
-		fmt.Printf("error while read config file %s: %v\n", configFile, err)
-		return
-	}
-
-	err = toml.Unmarshal(b, &config)
-	if err != nil {
-		fmt.Printf("error while unmarshal config file %s: %v\n", configFile, err)
+		fmt.Printf("error while getting config: %v\n", err)
 		return
 	}
 
@@ -93,7 +61,7 @@ func main() {
 		}
 	}()
 
-	logg.Info("calendar is running...")
+	logg.Info(fmt.Sprintf("calendar is running on http://%s:%d", config.Server.Host, config.Server.Port))
 
 	if err := server.Start(ctx); err != nil {
 		logg.Error("failed to start http server: " + err.Error())

@@ -10,7 +10,7 @@ import (
 	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/app"
 	inmemorystorage "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/storage/memory"
 	sqlstorage "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/storage/sql"
-	"github.com/pelletier/go-toml"
+	toml "github.com/pelletier/go-toml"
 )
 
 func getStorage(dbConf DatabaseConf) (app.Storage, error) {

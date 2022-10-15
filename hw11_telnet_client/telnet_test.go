@@ -63,3 +63,39 @@ func TestTelnetClient(t *testing.T) {
 		wg.Wait()
 	})
 }
+
+func TestTelnetClientFailingCases(t *testing.T) {
+	t.Run("telnet fails to connect", func(t *testing.T) {
+		in := &bytes.Buffer{}
+		out := &bytes.Buffer{}
+
+		timeout, err := time.ParseDuration("10s")
+		require.NoError(t, err)
+
+		client := NewTelnetClient("some_definitely_wrong_address:9999", timeout, ioutil.NopCloser(in), out)
+		err = client.Connect()
+		require.Error(t, err)
+	})
+
+	t.Run("telnet fails to send", func(t *testing.T) {
+		l, err := net.Listen("tcp", "127.0.0.1:")
+		require.NoError(t, err)
+
+		in := &bytes.Buffer{}
+		out := &bytes.Buffer{}
+
+		timeout, err := time.ParseDuration("10s")
+		require.NoError(t, err)
+
+		client := NewTelnetClient(l.Addr().String(), timeout, ioutil.NopCloser(in), out)
+		err = client.Connect()
+		require.NoError(t, err)
+
+		err = l.Close()
+		require.NoError(t, err)
+
+		in.WriteString("some string\n")
+		err = client.Send()
+		require.Error(t, err)
+	})
+}

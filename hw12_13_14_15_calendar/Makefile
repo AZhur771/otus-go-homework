@@ -34,4 +34,7 @@ lint: install-lint-deps
 migrate:
 	goose -dir=migrations postgres "user=postgres password=postgres dbname=calendar sslmode=disable" up
 
+go-version:
+	which go && go version
+
 .PHONY: build run build-img run-img version test lint migrate

@@ -66,8 +66,10 @@ func (c *SimpleTelnetClient) Receive() error {
 }
 
 func (c *SimpleTelnetClient) Close() error {
-	if err := c.conn.Close(); err != nil {
-		return fmt.Errorf("SimpleTelnetClient: cannot close connection to %s: %w", c.address, err)
+	if c.conn != nil {
+		if err := c.conn.Close(); err != nil {
+			return fmt.Errorf("SimpleTelnetClient: cannot close connection to %s: %w", c.address, err)
+		}
 	}
 
 	return nil

@@ -47,13 +47,12 @@ func main() {
 	defer close(done)
 
 	go func() {
-		for {
-			err := telnetClient.Send()
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				done <- struct{}{}
-				return
-			}
+		// allow only one iteration
+		err := telnetClient.Send()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			done <- struct{}{}
+			return
 		}
 	}()
 

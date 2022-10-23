@@ -17,7 +17,7 @@ type Event struct {
 	DateStart time.Time `db:"date_start"`
 
 	// Длительность события
-	Duration time.Duration `db:"duration"`
+	Duration PqDuration `db:"duration"`
 
 	// Описание события
 	Description string `db:"description"`
@@ -26,5 +26,5 @@ type Event struct {
 	UserID uuid.UUID `db:"user_id"`
 
 	// За сколько времени высылать уведомление
-	NotificationPeriod time.Duration `db:"notification_period"`
+	NotificationPeriod PqDuration `db:"notification_period"`
 }

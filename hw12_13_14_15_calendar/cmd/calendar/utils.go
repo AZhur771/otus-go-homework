@@ -3,19 +3,19 @@ package main
 import (
 	"context"
 	"fmt"
-	"io"
-	"log"
-	"os"
-
 	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/app"
 	inmemorystorage "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/storage/memory"
 	sqlstorage "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/storage/sql"
 	toml "github.com/pelletier/go-toml"
+	"io"
+	"log"
+	"os"
+	"time"
 )
 
 func getStorage(dbConf DatabaseConf) (app.Storage, error) {
 	if dbConf.MemoryStorage == "sql" {
-		storage := sqlstorage.New()
+		storage := sqlstorage.New(dbConf.DBTimeout * time.Millisecond)
 		ctx := context.Background()
 		datasource := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 			dbConf.Host, dbConf.Port, dbConf.Username, dbConf.Password, dbConf.DBName, dbConf.SslMode)

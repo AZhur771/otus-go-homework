@@ -48,7 +48,7 @@ func (s *Storage) AddEvent(event storage.Event) (storage.Event, error) {
 	return event, nil
 }
 
-func (s *Storage) DeleteEvent(id uuid.UUID) (storage.Event, error) {
+func (s *Storage) DeleteEventById(id uuid.UUID) (storage.Event, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -95,13 +95,13 @@ func (s *Storage) GetEvents() ([]storage.Event, error) {
 	return s.events, nil
 }
 
-func (s *Storage) GetEventsForPeriod(dateStart time.Time, duration time.Duration) ([]storage.Event, error) {
+func (s *Storage) GetEventsForPeriod(dateStart time.Time, duration storage.PqDuration) ([]storage.Event, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	eventsFiltered := make([]storage.Event, 0)
 
-	dateEnd := dateStart.Add(duration)
+	dateEnd := dateStart.Add(time.Duration(duration))
 
 	for _, e := range s.events {
 		if dateStart.Equal(e.DateStart) || dateStart.Before(e.DateStart) && dateEnd.After(e.DateStart) {

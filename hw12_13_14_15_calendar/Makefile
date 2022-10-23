@@ -7,6 +7,21 @@ LDFLAGS := -X main.release="develop" -X main.buildDate=$(shell date -u +%Y-%m-%d
 build:
 	go build -v -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/calendar
 
+generate:
+	protoc --go_out=api/stubs \
+		  --go-grpc_out=api/stubs \
+		  --grpc-gateway_out=api/stubs \
+		  --grpc-gateway_opt=allow_delete_body=true \
+		  --grpc-gateway_opt generate_unbound_methods=true \
+  		  --proto_path=third_party/ \
+  		  --proto_path=api/ \
+  		  --openapiv2_out=third_party/openapiv2 \
+  		  --openapiv2_opt allow_delete_body=true \
+		  api/event_service.proto
+
+protoc-version:
+	which protoc && protoc --version
+
 run: build
 	$(BIN) -config ./configs/config.toml
 

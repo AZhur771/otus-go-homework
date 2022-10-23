@@ -3,51 +3,61 @@ package internalhttp
 import (
 	"context"
 	"fmt"
-	"io"
+	eventpb "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/api/stubs"
+
+	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/app"
+
 	"net/http"
-	"time"
+	"strings"
+
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"google.golang.org/grpc"
 )
 
 type Server struct {
-	internal *http.Server
+	grpcGW *http.Server
 }
 
-type Logger interface {
-	Debug(msg string)
-	Info(msg string)
-	Warn(msg string)
-	Error(msg string)
-}
+// NewServer returns new grpc Gateway Server
+func NewServer(ctx context.Context, logger app.Logger, host string, port int, conn *grpc.ClientConn) (*Server, error) {
+	gwmux := runtime.NewServeMux()
 
-type Application interface { // TODO
-}
+	err := eventpb.RegisterEventServiceHandler(ctx, gwmux, conn)
+	if err != nil {
+		return nil, err
+	}
 
-func HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "hello-world")
-}
+	oa, err := GetOpenAPIHandler()
+	if err != nil {
+		return nil, err
+	}
 
-func NewServer(logger Logger, app Application, host string, port int) *Server {
-	mux := http.DefaultServeMux
+	handlerFunc := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/api") {
+			gwmux.ServeHTTP(w, r)
+			return
+		}
+		oa.ServeHTTP(w, r)
+	})
 
-	mux.Handle("/", loggingMiddleware(http.HandlerFunc(HelloWorldHandler), logger))
+	handler := loggingMiddleware(handlerFunc, logger)
 
-	server := &http.Server{
-		Addr:              fmt.Sprintf("%s:%d", host, port),
-		Handler:           mux,
-		ReadHeaderTimeout: 2 * time.Second,
+	gwServer := &http.Server{
+		Addr:    fmt.Sprintf("%s:%d", host, port),
+		Handler: handler,
 	}
 
 	return &Server{
-		internal: server,
-	}
+		grpcGW: gwServer,
+	}, nil
 }
 
-func (s *Server) Start(ctx context.Context) error {
-	err := s.internal.ListenAndServe()
+func (s *Server) Start() error {
+	err := s.grpcGW.ListenAndServe()
 	return err
 }
 
 func (s *Server) Stop(ctx context.Context) error {
-	err := s.internal.Shutdown(ctx)
+	err := s.grpcGW.Shutdown(ctx)
 	return err
 }

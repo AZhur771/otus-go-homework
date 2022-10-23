@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func generateDummyEvent(title string, desc string, addToDate time.Duration) (event storage.Event, err error) {
+func generateDummyEvent(title string, desc string, addToDate storage.PqDuration) (event storage.Event, err error) {
 	UUID, err := uuid.NewUUID()
 	if err != nil {
 		return
@@ -25,16 +25,16 @@ func generateDummyEvent(title string, desc string, addToDate time.Duration) (eve
 		return
 	}
 
-	dummyDate := time.Date(2022, 0o1, 0o1, 0, 0, 0, 0, location)
+	dummyDate := time.Date(2022, 1, 1, 0, 0, 0, 0, location)
 
 	event = storage.Event{
 		ID:                 UUID,
 		Title:              title,
-		DateStart:          dummyDate.Add(addToDate),
-		Duration:           time.Hour * 24,
+		DateStart:          dummyDate.Add(time.Duration(addToDate)),
+		Duration:           storage.PqDuration(time.Hour * 24),
 		Description:        desc,
 		UserID:             userUUID,
-		NotificationPeriod: time.Hour * 12,
+		NotificationPeriod: storage.PqDuration(time.Hour * 12),
 	}
 
 	return
@@ -89,7 +89,7 @@ func TestStorage(t *testing.T) {
 		_, err = s.AddEvent(event)
 		require.NoError(t, err)
 
-		_, err = s.DeleteEvent(event.ID)
+		_, err = s.DeleteEventById(event.ID)
 		require.NoError(t, err)
 
 		require.Equal(t, 0, len(s.events))
@@ -120,7 +120,7 @@ func TestStorage(t *testing.T) {
 		_, err = s.AddEvent(event)
 		require.NoError(t, err)
 
-		event, err = generateDummyEvent("some title 2", "some description 2", time.Hour*24)
+		event, err = generateDummyEvent("some title 2", "some description 2", storage.PqDuration(time.Hour*24))
 		require.NoError(t, err)
 
 		_, err = s.AddEvent(event)
@@ -141,13 +141,13 @@ func TestStorage(t *testing.T) {
 		_, err = s.AddEvent(event1)
 		require.NoError(t, err)
 
-		event2, err := generateDummyEvent("some title 2", "some description 2", time.Hour*24*2)
+		event2, err := generateDummyEvent("some title 2", "some description 2", storage.PqDuration(time.Hour*24*2))
 		require.NoError(t, err)
 
 		_, err = s.AddEvent(event2)
 		require.NoError(t, err)
 
-		events, err := s.GetEventsForPeriod(event1.DateStart, time.Hour*24)
+		events, err := s.GetEventsForPeriod(event1.DateStart, storage.PqDuration(time.Hour*24))
 		require.NoError(t, err)
 
 		require.Equal(t, 1, len(events))

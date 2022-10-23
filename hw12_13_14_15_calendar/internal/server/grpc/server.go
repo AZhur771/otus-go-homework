@@ -2,13 +2,20 @@ package internalgrpc
 
 import (
 	"context"
+	"errors"
+	"time"
+
 	eventpb "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/api/stubs"
 	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/app"
 	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/storage"
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"time"
+)
+
+var (
+	ErrPeriodStartAbsent = errors.New("periodStart is not passed")
+	ErrPeriodEndAbsent   = errors.New("periodEnd is not passed")
 )
 
 type EventServiceServerImpl struct {
@@ -24,14 +31,17 @@ func NewServer(storage app.Storage, logger app.Logger) eventpb.EventServiceServe
 	}
 }
 
-func (e EventServiceServerImpl) AddEvent(ctx context.Context, request *eventpb.AddEventRequest) (*eventpb.Event, error) {
-	userId, err := uuid.Parse(request.GetUserId())
+func (e EventServiceServerImpl) AddEvent(
+	ctx context.Context,
+	request *eventpb.AddEventRequest,
+) (*eventpb.Event, error) {
+	userID, err := uuid.Parse(request.GetUserId())
 	if err != nil {
 		return nil, err
 	}
 
 	event := storage.Event{
-		UserID:             userId,
+		UserID:             userID,
 		Title:              request.GetTitle(),
 		Description:        request.GetDescription(),
 		DateStart:          request.GetDateStart().AsTime(),
@@ -55,13 +65,16 @@ func (e EventServiceServerImpl) AddEvent(ctx context.Context, request *eventpb.A
 	}, nil
 }
 
-func (e EventServiceServerImpl) DeleteEventById(ctx context.Context, request *eventpb.DeleteEventByIdRequest) (*eventpb.Event, error) {
-	eventId, err := uuid.Parse(request.GetId())
+func (e EventServiceServerImpl) DeleteEventByID(
+	ctx context.Context,
+	request *eventpb.DeleteEventByIDRequest,
+) (*eventpb.Event, error) {
+	eventID, err := uuid.Parse(request.GetId())
 	if err != nil {
 		return nil, err
 	}
 
-	event, err := e.storage.DeleteEventById(eventId)
+	event, err := e.storage.DeleteEventByID(eventID)
 	if err != nil {
 		return nil, err
 	}
@@ -77,20 +90,23 @@ func (e EventServiceServerImpl) DeleteEventById(ctx context.Context, request *ev
 	}, nil
 }
 
-func (e EventServiceServerImpl) UpdateEventByID(ctx context.Context, request *eventpb.Event) (*eventpb.Event, error) {
-	eventId, err := uuid.Parse(request.GetId())
+func (e EventServiceServerImpl) UpdateEventByID(
+	ctx context.Context,
+	request *eventpb.Event,
+) (*eventpb.Event, error) {
+	eventID, err := uuid.Parse(request.GetId())
 	if err != nil {
 		return nil, err
 	}
 
-	userId, err := uuid.Parse(request.GetUserId())
+	userID, err := uuid.Parse(request.GetUserId())
 	if err != nil {
 		return nil, err
 	}
 
 	event := storage.Event{
-		ID:                 eventId,
-		UserID:             userId,
+		ID:                 eventID,
+		UserID:             userID,
 		Title:              request.GetTitle(),
 		Description:        request.GetDescription(),
 		DateStart:          request.GetDateStart().AsTime(),
@@ -114,13 +130,16 @@ func (e EventServiceServerImpl) UpdateEventByID(ctx context.Context, request *ev
 	}, nil
 }
 
-func (e EventServiceServerImpl) GetEventByID(ctx context.Context, request *eventpb.GetEventByIDRequest) (*eventpb.Event, error) {
-	eventId, err := uuid.Parse(request.GetId())
+func (e EventServiceServerImpl) GetEventByID(
+	ctx context.Context,
+	request *eventpb.GetEventByIDRequest,
+) (*eventpb.Event, error) {
+	eventID, err := uuid.Parse(request.GetId())
 	if err != nil {
 		return nil, err
 	}
 
-	event, err := e.storage.GetEventByID(eventId)
+	event, err := e.storage.GetEventByID(eventID)
 	if err != nil {
 		return nil, err
 	}
@@ -136,19 +155,26 @@ func (e EventServiceServerImpl) GetEventByID(ctx context.Context, request *event
 	}, nil
 }
 
-func (e EventServiceServerImpl) GetEvents(ctx context.Context, request *eventpb.GetEventsRequest) (*eventpb.Events, error) {
-	dateStart := request.GetDateStart()
-	duration := request.GetDuration()
+func (e EventServiceServerImpl) GetEvents(
+	ctx context.Context,
+	request *eventpb.GetEventsRequest,
+) (*eventpb.Events, error) {
+	periodStart := request.GetPeriodStart()
+	periodEnd := request.GetPeriodEnd()
 
 	var events []storage.Event
 	var err error
 
-	if dateStart != nil {
-		if duration != nil {
-			events, err = e.storage.GetEventsForPeriod(dateStart.AsTime(), storage.PqDuration(duration.AsDuration()))
-		} else {
-			events, err = e.storage.GetEventsForPeriod(dateStart.AsTime(), storage.PqDuration(time.Duration(1<<63-1)))
+	if periodStart != nil || periodEnd != nil {
+		if periodStart == nil {
+			return nil, ErrPeriodStartAbsent
 		}
+
+		if periodEnd == nil {
+			return nil, ErrPeriodEndAbsent
+		}
+
+		events, err = e.storage.GetEventsForPeriod(periodStart.AsTime(), periodEnd.AsTime())
 	} else {
 		events, err = e.storage.GetEvents()
 	}
@@ -171,9 +197,4 @@ func (e EventServiceServerImpl) GetEvents(ctx context.Context, request *eventpb.
 	}
 
 	return &eventpb.Events{Events: eventspb}, nil
-}
-
-func (e EventServiceServerImpl) mustEmbedUnimplementedEventServiceServer() {
-	//TODO implement me
-	panic("implement me")
 }

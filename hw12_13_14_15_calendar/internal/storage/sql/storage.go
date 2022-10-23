@@ -56,7 +56,7 @@ func (s *Storage) AddEvent(event storage.Event) (storage.Event, error) {
 	return event, err
 }
 
-func (s *Storage) DeleteEventById(id uuid.UUID) (storage.Event, error) {
+func (s *Storage) DeleteEventByID(id uuid.UUID) (storage.Event, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 	defer cancel()
 
@@ -157,17 +157,17 @@ func (s *Storage) GetEvents() ([]storage.Event, error) {
 	return events, err
 }
 
-func (s *Storage) GetEventsForPeriod(dateStart time.Time, duration storage.PqDuration) ([]storage.Event, error) {
+func (s *Storage) GetEventsForPeriod(startPeriod time.Time, endPeriod time.Time) ([]storage.Event, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	events := make([]storage.Event, 0)
 
-	sql := "SELECT * FROM events WHERE date_start >= :start AND date_start + duration < :end"
+	sql := "SELECT * FROM events WHERE date_start >= :start AND date_start < :end"
 
 	rows, err := s.db.NamedQueryContext(ctx, sql, map[string]interface{}{
-		"start": dateStart,
-		"end":   dateStart.Add(time.Duration(duration)),
+		"start": startPeriod,
+		"end":   endPeriod,
 	})
 	if err != nil {
 		return events, err

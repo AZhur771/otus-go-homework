@@ -3,13 +3,12 @@ package internalhttp
 import (
 	"context"
 	"fmt"
-	eventpb "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/api/stubs"
-
-	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/app"
-
 	"net/http"
 	"strings"
+	"time"
 
+	eventpb "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/api/stubs"
+	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/app"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 )
@@ -18,8 +17,14 @@ type Server struct {
 	grpcGW *http.Server
 }
 
-// NewServer returns new grpc Gateway Server
-func NewServer(ctx context.Context, logger app.Logger, host string, port int, conn *grpc.ClientConn) (*Server, error) {
+// NewServer returns new grpc Gateway Server.
+func NewServer(
+	ctx context.Context,
+	logger app.Logger,
+	host string,
+	port int,
+	conn *grpc.ClientConn,
+) (*Server, error) {
 	gwmux := runtime.NewServeMux()
 
 	err := eventpb.RegisterEventServiceHandler(ctx, gwmux, conn)
@@ -43,8 +48,9 @@ func NewServer(ctx context.Context, logger app.Logger, host string, port int, co
 	handler := loggingMiddleware(handlerFunc, logger)
 
 	gwServer := &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", host, port),
-		Handler: handler,
+		Addr:              fmt.Sprintf("%s:%d", host, port),
+		Handler:           handler,
+		ReadHeaderTimeout: 2 * time.Second,
 	}
 
 	return &Server{

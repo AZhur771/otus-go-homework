@@ -89,7 +89,7 @@ func TestStorage(t *testing.T) {
 		_, err = s.AddEvent(event)
 		require.NoError(t, err)
 
-		_, err = s.DeleteEventById(event.ID)
+		_, err = s.DeleteEventByID(event.ID)
 		require.NoError(t, err)
 
 		require.Equal(t, 0, len(s.events))
@@ -147,7 +147,7 @@ func TestStorage(t *testing.T) {
 		_, err = s.AddEvent(event2)
 		require.NoError(t, err)
 
-		events, err := s.GetEventsForPeriod(event1.DateStart, storage.PqDuration(time.Hour*24))
+		events, err := s.GetEventsForPeriod(event1.DateStart, event1.DateStart.Add(time.Hour*24))
 		require.NoError(t, err)
 
 		require.Equal(t, 1, len(events))

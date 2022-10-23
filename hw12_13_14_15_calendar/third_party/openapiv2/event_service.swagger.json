@@ -40,17 +40,18 @@
         },
         "parameters": [
           {
-            "name": "dateStart",
+            "name": "periodStart",
             "in": "query",
             "required": false,
             "type": "string",
             "format": "date-time"
           },
           {
-            "name": "duration",
+            "name": "periodEnd",
             "in": "query",
             "required": false,
-            "type": "string"
+            "type": "string",
+            "format": "date-time"
           }
         ],
         "tags": [
@@ -124,7 +125,7 @@
       "delete": {
         "summary": "Delete an event",
         "description": "Delete an event from the server.",
-        "operationId": "EventService_DeleteEventById",
+        "operationId": "EventService_DeleteEventByID",
         "responses": {
           "200": {
             "description": "A successful response.",

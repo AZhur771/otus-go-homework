@@ -15,7 +15,7 @@ func (d *PqDuration) Scan(src interface{}) error {
 		return fmt.Errorf("duration column was not []uint8; type %T", src)
 	}
 
-	v := string(srcStr[:])
+	v := string(srcStr)
 	v = strings.Replace(v, ":", "h", 1)
 	v = strings.Replace(v, ":", "m", 1)
 	v += "s"

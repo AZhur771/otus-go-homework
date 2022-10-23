@@ -10,7 +10,7 @@ gateway_port = 3001
 shutdown_timeout = 3000 # ms
 
 [database]
-memory_storage = "sql" # available storages: `inmemory` | `sql`
+storage_type = "sql" # available storages: `inmemory` | `sql`
 host = "localhost"
 port = 5432
 username = "postgres"

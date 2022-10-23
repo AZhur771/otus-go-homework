@@ -34,7 +34,7 @@ service EventService {
     };
   };
 
-  rpc DeleteEventById(DeleteEventByIdRequest) returns (Event) {
+  rpc DeleteEventByID(DeleteEventByIDRequest) returns (Event) {
     option (google.api.http) = {
       delete: "/api/events/{id}"
       body: "*"
@@ -104,7 +104,7 @@ message AddEventRequest {
   google.protobuf.Duration notification_period = 7;
 }
 
-message DeleteEventByIdRequest {
+message DeleteEventByIDRequest {
   string id = 1;
 }
 
@@ -113,6 +113,6 @@ message GetEventByIDRequest {
 }
 
 message GetEventsRequest {
-  optional google.protobuf.Timestamp dateStart = 1;
-  optional google.protobuf.Duration duration = 2;
+  optional google.protobuf.Timestamp periodStart = 1;
+  optional google.protobuf.Timestamp periodEnd = 2;
 }

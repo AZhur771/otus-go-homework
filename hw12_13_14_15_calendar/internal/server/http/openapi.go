@@ -1,10 +1,11 @@
 package internalhttp
 
 import (
-	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/third_party"
 	"io/fs"
 	"mime"
 	"net/http"
+
+	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/third_party"
 )
 
 // GetOpenAPIHandler serves an OpenAPI UI.

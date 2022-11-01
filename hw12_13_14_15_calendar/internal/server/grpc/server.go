@@ -100,7 +100,7 @@ func (e EventServiceServerImpl) UpdateEventByID(
 		NotificationPeriod: storage.PqDuration(request.GetNotificationPeriod().AsDuration()),
 	}
 
-	event, err = e.storage.UpdateEventByID(event)
+	_, err = e.storage.UpdateEventByID(event)
 	if err != nil {
 		return nil, err
 	}

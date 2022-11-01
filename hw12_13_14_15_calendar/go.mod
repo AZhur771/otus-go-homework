@@ -10,7 +10,6 @@ require (
 	github.com/lib/pq v1.10.7
 	github.com/pelletier/go-toml v1.9.5
 	github.com/stretchr/testify v1.8.0
-	golang.org/x/net v0.0.0-20220909164309-bea034e7d591
 	google.golang.org/genproto v0.0.0-20221018160656-63c7b68cfc55
 	google.golang.org/grpc v1.50.1
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.2.0

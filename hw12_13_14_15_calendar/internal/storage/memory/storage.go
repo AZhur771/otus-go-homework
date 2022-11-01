@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/storage"
-	"github.com/google/uuid"
+	uuid "github.com/google/uuid"
 )
 
 var ErrNoEventFound = errors.New("event not found error")
@@ -44,7 +44,14 @@ func getEventAndEventIdx(id uuid.UUID, events []storage.Event) (storage.Event, i
 func (s *Storage) AddEvent(event storage.Event) (storage.Event, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+
+	UUID, err := uuid.NewUUID()
+	if err != nil {
+		return event, err
+	}
+	event.ID = UUID
 	s.events = append(s.events, event)
+
 	return event, nil
 }
 

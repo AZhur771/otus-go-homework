@@ -34,7 +34,7 @@ func NewServer(storage app.Storage, logger app.Logger) eventpb.EventServiceServe
 func (e EventServiceServerImpl) AddEvent(
 	ctx context.Context,
 	request *eventpb.AddEventRequest,
-) (*eventpb.Event, error) {
+) (*eventpb.AddEventResponse, error) {
 	userID, err := uuid.Parse(request.GetUserId())
 	if err != nil {
 		return nil, err
@@ -54,46 +54,32 @@ func (e EventServiceServerImpl) AddEvent(
 		return nil, err
 	}
 
-	return &eventpb.Event{
-		Id:                 event.ID.String(),
-		UserId:             event.UserID.String(),
-		Title:              event.Title,
-		Description:        event.Description,
-		DateStart:          timestamppb.New(event.DateStart),
-		Duration:           durationpb.New(time.Duration(event.Duration)),
-		NotificationPeriod: durationpb.New(time.Duration(event.NotificationPeriod)),
+	return &eventpb.AddEventResponse{
+		Id: event.ID.String(),
 	}, nil
 }
 
 func (e EventServiceServerImpl) DeleteEventByID(
 	ctx context.Context,
 	request *eventpb.DeleteEventByIDRequest,
-) (*eventpb.Event, error) {
+) (*eventpb.DeleteEventByIDResponse, error) {
 	eventID, err := uuid.Parse(request.GetId())
 	if err != nil {
 		return nil, err
 	}
 
-	event, err := e.storage.DeleteEventByID(eventID)
+	_, err = e.storage.DeleteEventByID(eventID)
 	if err != nil {
 		return nil, err
 	}
 
-	return &eventpb.Event{
-		Id:                 event.ID.String(),
-		UserId:             event.UserID.String(),
-		Title:              event.Title,
-		Description:        event.Description,
-		DateStart:          timestamppb.New(event.DateStart),
-		Duration:           durationpb.New(time.Duration(event.Duration)),
-		NotificationPeriod: durationpb.New(time.Duration(event.NotificationPeriod)),
-	}, nil
+	return &eventpb.DeleteEventByIDResponse{}, nil
 }
 
 func (e EventServiceServerImpl) UpdateEventByID(
 	ctx context.Context,
 	request *eventpb.Event,
-) (*eventpb.Event, error) {
+) (*eventpb.UpdateEventByIDResponse, error) {
 	eventID, err := uuid.Parse(request.GetId())
 	if err != nil {
 		return nil, err
@@ -119,15 +105,7 @@ func (e EventServiceServerImpl) UpdateEventByID(
 		return nil, err
 	}
 
-	return &eventpb.Event{
-		Id:                 event.ID.String(),
-		UserId:             event.UserID.String(),
-		Title:              event.Title,
-		Description:        event.Description,
-		DateStart:          timestamppb.New(event.DateStart),
-		Duration:           durationpb.New(time.Duration(event.Duration)),
-		NotificationPeriod: durationpb.New(time.Duration(event.NotificationPeriod)),
-	}, nil
+	return &eventpb.UpdateEventByIDResponse{}, nil
 }
 
 func (e EventServiceServerImpl) GetEventByID(
@@ -182,7 +160,7 @@ func (e EventServiceServerImpl) GetEvents(
 		return nil, err
 	}
 
-	eventspb := make([]*eventpb.Event, 0)
+	eventspb := make([]*eventpb.Event, 0, len(events))
 
 	for _, event := range events {
 		eventspb = append(eventspb, &eventpb.Event{

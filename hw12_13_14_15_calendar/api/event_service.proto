@@ -22,7 +22,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 };
 
 service EventService {
-  rpc AddEvent(AddEventRequest) returns (Event) {
+  rpc AddEvent(AddEventRequest) returns (AddEventResponse) {
     option (google.api.http) = {
       post: "/api/events"
       body: "*"
@@ -34,7 +34,7 @@ service EventService {
     };
   };
 
-  rpc DeleteEventByID(DeleteEventByIDRequest) returns (Event) {
+  rpc DeleteEventByID(DeleteEventByIDRequest) returns (DeleteEventByIDResponse) {
     option (google.api.http) = {
       delete: "/api/events/{id}"
       body: "*"
@@ -46,7 +46,7 @@ service EventService {
     };
   };
 
-  rpc UpdateEventByID(Event) returns (Event) {
+  rpc UpdateEventByID(Event) returns (UpdateEventByIDResponse) {
     option (google.api.http) = {
       put: "/api/events/{id}"
       body: "*"
@@ -83,11 +83,11 @@ service EventService {
 
 message Event {
   string id = 1;
-  string user_id = 6;
-  string title = 2;
-  string Description = 5;
-  google.protobuf.Timestamp date_start = 3;
-  google.protobuf.Duration duration = 4;
+  string user_id = 2;
+  string title = 3;
+  string Description = 4;
+  google.protobuf.Timestamp date_start = 5;
+  google.protobuf.Duration duration = 6;
   google.protobuf.Duration notification_period = 7;
 }
 
@@ -96,16 +96,28 @@ message Events {
 }
 
 message AddEventRequest {
-  string user_id = 6;
+  string user_id = 1;
   string title = 2;
-  string Description = 5;
-  google.protobuf.Timestamp date_start = 3;
-  google.protobuf.Duration duration = 4;
-  google.protobuf.Duration notification_period = 7;
+  string Description = 3;
+  google.protobuf.Timestamp date_start = 4;
+  google.protobuf.Duration duration = 5;
+  google.protobuf.Duration notification_period = 6;
+}
+
+message AddEventResponse {
+  string id = 1;
 }
 
 message DeleteEventByIDRequest {
   string id = 1;
+}
+
+message UpdateEventByIDResponse {
+
+}
+
+message DeleteEventByIDResponse {
+
 }
 
 message GetEventByIDRequest {

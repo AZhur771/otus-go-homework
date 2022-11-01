@@ -22,9 +22,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type EventServiceClient interface {
-	AddEvent(ctx context.Context, in *AddEventRequest, opts ...grpc.CallOption) (*Event, error)
-	DeleteEventByID(ctx context.Context, in *DeleteEventByIDRequest, opts ...grpc.CallOption) (*Event, error)
-	UpdateEventByID(ctx context.Context, in *Event, opts ...grpc.CallOption) (*Event, error)
+	AddEvent(ctx context.Context, in *AddEventRequest, opts ...grpc.CallOption) (*AddEventResponse, error)
+	DeleteEventByID(ctx context.Context, in *DeleteEventByIDRequest, opts ...grpc.CallOption) (*DeleteEventByIDResponse, error)
+	UpdateEventByID(ctx context.Context, in *Event, opts ...grpc.CallOption) (*UpdateEventByIDResponse, error)
 	GetEventByID(ctx context.Context, in *GetEventByIDRequest, opts ...grpc.CallOption) (*Event, error)
 	GetEvents(ctx context.Context, in *GetEventsRequest, opts ...grpc.CallOption) (*Events, error)
 }
@@ -37,8 +37,8 @@ func NewEventServiceClient(cc grpc.ClientConnInterface) EventServiceClient {
 	return &eventServiceClient{cc}
 }
 
-func (c *eventServiceClient) AddEvent(ctx context.Context, in *AddEventRequest, opts ...grpc.CallOption) (*Event, error) {
-	out := new(Event)
+func (c *eventServiceClient) AddEvent(ctx context.Context, in *AddEventRequest, opts ...grpc.CallOption) (*AddEventResponse, error) {
+	out := new(AddEventResponse)
 	err := c.cc.Invoke(ctx, "/event.EventService/AddEvent", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -46,8 +46,8 @@ func (c *eventServiceClient) AddEvent(ctx context.Context, in *AddEventRequest, 
 	return out, nil
 }
 
-func (c *eventServiceClient) DeleteEventByID(ctx context.Context, in *DeleteEventByIDRequest, opts ...grpc.CallOption) (*Event, error) {
-	out := new(Event)
+func (c *eventServiceClient) DeleteEventByID(ctx context.Context, in *DeleteEventByIDRequest, opts ...grpc.CallOption) (*DeleteEventByIDResponse, error) {
+	out := new(DeleteEventByIDResponse)
 	err := c.cc.Invoke(ctx, "/event.EventService/DeleteEventByID", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -55,8 +55,8 @@ func (c *eventServiceClient) DeleteEventByID(ctx context.Context, in *DeleteEven
 	return out, nil
 }
 
-func (c *eventServiceClient) UpdateEventByID(ctx context.Context, in *Event, opts ...grpc.CallOption) (*Event, error) {
-	out := new(Event)
+func (c *eventServiceClient) UpdateEventByID(ctx context.Context, in *Event, opts ...grpc.CallOption) (*UpdateEventByIDResponse, error) {
+	out := new(UpdateEventByIDResponse)
 	err := c.cc.Invoke(ctx, "/event.EventService/UpdateEventByID", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -86,9 +86,9 @@ func (c *eventServiceClient) GetEvents(ctx context.Context, in *GetEventsRequest
 // All implementations must embed UnimplementedEventServiceServer
 // for forward compatibility
 type EventServiceServer interface {
-	AddEvent(context.Context, *AddEventRequest) (*Event, error)
-	DeleteEventByID(context.Context, *DeleteEventByIDRequest) (*Event, error)
-	UpdateEventByID(context.Context, *Event) (*Event, error)
+	AddEvent(context.Context, *AddEventRequest) (*AddEventResponse, error)
+	DeleteEventByID(context.Context, *DeleteEventByIDRequest) (*DeleteEventByIDResponse, error)
+	UpdateEventByID(context.Context, *Event) (*UpdateEventByIDResponse, error)
 	GetEventByID(context.Context, *GetEventByIDRequest) (*Event, error)
 	GetEvents(context.Context, *GetEventsRequest) (*Events, error)
 	mustEmbedUnimplementedEventServiceServer()
@@ -98,13 +98,13 @@ type EventServiceServer interface {
 type UnimplementedEventServiceServer struct {
 }
 
-func (UnimplementedEventServiceServer) AddEvent(context.Context, *AddEventRequest) (*Event, error) {
+func (UnimplementedEventServiceServer) AddEvent(context.Context, *AddEventRequest) (*AddEventResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddEvent not implemented")
 }
-func (UnimplementedEventServiceServer) DeleteEventByID(context.Context, *DeleteEventByIDRequest) (*Event, error) {
+func (UnimplementedEventServiceServer) DeleteEventByID(context.Context, *DeleteEventByIDRequest) (*DeleteEventByIDResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteEventByID not implemented")
 }
-func (UnimplementedEventServiceServer) UpdateEventByID(context.Context, *Event) (*Event, error) {
+func (UnimplementedEventServiceServer) UpdateEventByID(context.Context, *Event) (*UpdateEventByIDResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateEventByID not implemented")
 }
 func (UnimplementedEventServiceServer) GetEventByID(context.Context, *GetEventByIDRequest) (*Event, error) {

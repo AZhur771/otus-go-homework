@@ -66,7 +66,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/eventEvent"
+              "$ref": "#/definitions/eventAddEventResponse"
             }
           },
           "default": {
@@ -130,7 +130,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/eventEvent"
+              "$ref": "#/definitions/eventDeleteEventByIDResponse"
             }
           },
           "default": {
@@ -168,7 +168,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/eventEvent"
+              "$ref": "#/definitions/eventUpdateEventByIDResponse"
             }
           },
           "default": {
@@ -246,6 +246,17 @@
         }
       }
     },
+    "eventAddEventResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "eventDeleteEventByIDResponse": {
+      "type": "object"
+    },
     "eventEvent": {
       "type": "object",
       "properties": {
@@ -283,6 +294,9 @@
           }
         }
       }
+    },
+    "eventUpdateEventByIDResponse": {
+      "type": "object"
     },
     "protobufAny": {
       "type": "object",

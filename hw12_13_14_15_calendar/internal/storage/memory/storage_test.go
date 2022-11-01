@@ -51,7 +51,7 @@ func TestStorage(t *testing.T) {
 		require.NoError(t, err)
 
 		require.Equal(t, 1, len(s.events))
-		require.Equal(t, event.ID, s.events[0].ID)
+		require.Equal(t, event.Title, s.events[0].Title)
 	})
 
 	t.Run("Test update event", func(t *testing.T) {
@@ -60,8 +60,7 @@ func TestStorage(t *testing.T) {
 		event, err := generateDummyEvent("some title", "some description", 0)
 		require.NoError(t, err)
 
-		_, err = s.AddEvent(event)
-		require.NoError(t, err)
+		s.events = append(s.events, event)
 
 		updatedEvent := storage.Event{
 			ID:                 event.ID,
@@ -86,8 +85,7 @@ func TestStorage(t *testing.T) {
 		event, err := generateDummyEvent("some title", "some description", 0)
 		require.NoError(t, err)
 
-		_, err = s.AddEvent(event)
-		require.NoError(t, err)
+		s.events = append(s.events, event)
 
 		_, err = s.DeleteEventByID(event.ID)
 		require.NoError(t, err)
@@ -101,8 +99,7 @@ func TestStorage(t *testing.T) {
 		event, err := generateDummyEvent("some title", "some description", 0)
 		require.NoError(t, err)
 
-		_, err = s.AddEvent(event)
-		require.NoError(t, err)
+		s.events = append(s.events, event)
 
 		eventByID, err := s.GetEventByID(event.ID)
 		require.NoError(t, err)
@@ -114,17 +111,13 @@ func TestStorage(t *testing.T) {
 	t.Run("Test get events", func(t *testing.T) {
 		s := New()
 
-		event, err := generateDummyEvent("some title 1", "some description 1", 0)
+		event1, err := generateDummyEvent("some title 1", "some description 1", 0)
 		require.NoError(t, err)
 
-		_, err = s.AddEvent(event)
+		event2, err := generateDummyEvent("some title 2", "some description 2", storage.PqDuration(time.Hour*24))
 		require.NoError(t, err)
 
-		event, err = generateDummyEvent("some title 2", "some description 2", storage.PqDuration(time.Hour*24))
-		require.NoError(t, err)
-
-		_, err = s.AddEvent(event)
-		require.NoError(t, err)
+		s.events = append(s.events, event1, event2)
 
 		events, err := s.GetEvents()
 		require.NoError(t, err)
@@ -138,14 +131,10 @@ func TestStorage(t *testing.T) {
 		event1, err := generateDummyEvent("some title 1", "some description 1", 0)
 		require.NoError(t, err)
 
-		_, err = s.AddEvent(event1)
-		require.NoError(t, err)
-
 		event2, err := generateDummyEvent("some title 2", "some description 2", storage.PqDuration(time.Hour*24*2))
 		require.NoError(t, err)
 
-		_, err = s.AddEvent(event2)
-		require.NoError(t, err)
+		s.events = append(s.events, event1, event2)
 
 		events, err := s.GetEventsForPeriod(event1.DateStart, event1.DateStart.Add(time.Hour*24))
 		require.NoError(t, err)

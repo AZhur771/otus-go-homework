@@ -7,14 +7,15 @@
 package eventpb
 
 import (
+	reflect "reflect"
+	sync "sync"
+
 	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	durationpb "google.golang.org/protobuf/types/known/durationpb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
-	reflect "reflect"
-	sync "sync"
 )
 
 const (
@@ -673,20 +674,23 @@ func file_event_service_proto_rawDescGZIP() []byte {
 	return file_event_service_proto_rawDescData
 }
 
-var file_event_service_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
-var file_event_service_proto_goTypes = []interface{}{
-	(*Event)(nil),                   // 0: event.Event
-	(*Events)(nil),                  // 1: event.Events
-	(*AddEventRequest)(nil),         // 2: event.AddEventRequest
-	(*AddEventResponse)(nil),        // 3: event.AddEventResponse
-	(*DeleteEventByIDRequest)(nil),  // 4: event.DeleteEventByIDRequest
-	(*UpdateEventByIDResponse)(nil), // 5: event.UpdateEventByIDResponse
-	(*DeleteEventByIDResponse)(nil), // 6: event.DeleteEventByIDResponse
-	(*GetEventByIDRequest)(nil),     // 7: event.GetEventByIDRequest
-	(*GetEventsRequest)(nil),        // 8: event.GetEventsRequest
-	(*timestamppb.Timestamp)(nil),   // 9: google.protobuf.Timestamp
-	(*durationpb.Duration)(nil),     // 10: google.protobuf.Duration
-}
+var (
+	file_event_service_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+	file_event_service_proto_goTypes  = []interface{}{
+		(*Event)(nil),                   // 0: event.Event
+		(*Events)(nil),                  // 1: event.Events
+		(*AddEventRequest)(nil),         // 2: event.AddEventRequest
+		(*AddEventResponse)(nil),        // 3: event.AddEventResponse
+		(*DeleteEventByIDRequest)(nil),  // 4: event.DeleteEventByIDRequest
+		(*UpdateEventByIDResponse)(nil), // 5: event.UpdateEventByIDResponse
+		(*DeleteEventByIDResponse)(nil), // 6: event.DeleteEventByIDResponse
+		(*GetEventByIDRequest)(nil),     // 7: event.GetEventByIDRequest
+		(*GetEventsRequest)(nil),        // 8: event.GetEventsRequest
+		(*timestamppb.Timestamp)(nil),   // 9: google.protobuf.Timestamp
+		(*durationpb.Duration)(nil),     // 10: google.protobuf.Duration
+	}
+)
+
 var file_event_service_proto_depIdxs = []int32{
 	9,  // 0: event.Event.date_start:type_name -> google.protobuf.Timestamp
 	10, // 1: event.Event.duration:type_name -> google.protobuf.Duration

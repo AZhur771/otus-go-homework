@@ -8,6 +8,7 @@ package eventpb
 
 import (
 	context "context"
+
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -95,21 +96,24 @@ type EventServiceServer interface {
 }
 
 // UnimplementedEventServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedEventServiceServer struct {
-}
+type UnimplementedEventServiceServer struct{}
 
 func (UnimplementedEventServiceServer) AddEvent(context.Context, *AddEventRequest) (*AddEventResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddEvent not implemented")
 }
+
 func (UnimplementedEventServiceServer) DeleteEventByID(context.Context, *DeleteEventByIDRequest) (*DeleteEventByIDResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteEventByID not implemented")
 }
+
 func (UnimplementedEventServiceServer) UpdateEventByID(context.Context, *Event) (*UpdateEventByIDResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateEventByID not implemented")
 }
+
 func (UnimplementedEventServiceServer) GetEventByID(context.Context, *GetEventByIDRequest) (*Event, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetEventByID not implemented")
 }
+
 func (UnimplementedEventServiceServer) GetEvents(context.Context, *GetEventsRequest) (*Events, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetEvents not implemented")
 }

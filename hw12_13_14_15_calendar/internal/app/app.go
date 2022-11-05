@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"time"
 
 	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/storage"
@@ -12,6 +13,21 @@ type Logger interface {
 	Info(msg string)
 	Warn(msg string)
 	Error(msg string)
+}
+
+type Producer interface {
+	Connect(ctx context.Context, exchangeName, exchangeType,
+		queueName, bindingKey string, persistent, reliable bool) error
+	Disconnect() error
+	Publish(ctx context.Context, msg Message) error
+	WaitForConfirms(ctx context.Context) error
+}
+
+type Consumer interface {
+	Connect(ctx context.Context, exchangeName, exchangeType,
+		queueName, consumerTag, bindingKey string, persistent bool) error
+	Disconnect() error
+	Consume(ctx context.Context) (<-chan Message, error)
 }
 
 type Storage interface {

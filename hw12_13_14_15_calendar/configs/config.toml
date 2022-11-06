@@ -6,15 +6,16 @@ level = "info"
 [server]
 host = "localhost"
 port = 3000
-shutdown_timeout = 3000
+gateway_port = 3001
+shutdown_timeout = 3000 # ms
 
 [database]
-memory_storage = "inmemory" # available storages: `inmemory` | `sql`
+storage_type = "sql" # available storages: `inmemory` | `sql`
 host = "localhost"
 port = 5432
-username = "postgress"
+username = "postgres"
 password = "postgres"
 db_name = "calendar"
 ssl_mode = "disable"
-db_timeout = 3000
+db_timeout = 3000 # ms
 max_connections = 5

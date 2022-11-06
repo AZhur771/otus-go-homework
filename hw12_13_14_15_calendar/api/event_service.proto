@@ -1,0 +1,130 @@
+syntax = "proto3";
+
+package event;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+import "google/api/annotations.proto";
+
+option go_package = "./;eventpb";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    version: "1.0";
+  };
+  external_docs: {
+    url: "https://github.com/AZhur771/otus-go-homework/tree/master/hw12_13_14_15_calendar";
+    description: "gRPC-gateway events calendar repository";
+  }
+  schemes: HTTP;
+};
+
+service EventService {
+  rpc AddEvent(AddEventRequest) returns (AddEventResponse) {
+    option (google.api.http) = {
+      post: "/api/events"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Add an event"
+      description: "Add an event to the server."
+      tags: "Events"
+    };
+  };
+
+  rpc DeleteEventByID(DeleteEventByIDRequest) returns (DeleteEventByIDResponse) {
+    option (google.api.http) = {
+      delete: "/api/events/{id}"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Delete an event"
+      description: "Delete an event from the server."
+      tags: "Events"
+    };
+  };
+
+  rpc UpdateEventByID(Event) returns (UpdateEventByIDResponse) {
+    option (google.api.http) = {
+      put: "/api/events/{id}"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Update an event"
+      description: "Update an event on the server."
+      tags: "Events"
+    };
+  };
+
+  rpc GetEventByID(GetEventByIDRequest) returns (Event) {
+    option (google.api.http) = {
+      get: "/api/events/{id}"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Get an event by id"
+      description: "Get an event by id from the server."
+      tags: "Events"
+    };
+  };
+
+  rpc GetEvents(GetEventsRequest) returns (Events) {
+    option (google.api.http) = {
+      get: "/api/events"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Get events"
+      description: "Get events from the server."
+      tags: "Events"
+    };
+  };
+}
+
+message Event {
+  string id = 1;
+  string user_id = 2;
+  string title = 3;
+  string Description = 4;
+  google.protobuf.Timestamp date_start = 5;
+  google.protobuf.Duration duration = 6;
+  google.protobuf.Duration notification_period = 7;
+}
+
+message Events {
+  repeated Event events = 1;
+}
+
+message AddEventRequest {
+  string user_id = 1;
+  string title = 2;
+  string Description = 3;
+  google.protobuf.Timestamp date_start = 4;
+  google.protobuf.Duration duration = 5;
+  google.protobuf.Duration notification_period = 6;
+}
+
+message AddEventResponse {
+  string id = 1;
+}
+
+message DeleteEventByIDRequest {
+  string id = 1;
+}
+
+message UpdateEventByIDResponse {
+
+}
+
+message DeleteEventByIDResponse {
+
+}
+
+message GetEventByIDRequest {
+  string id = 1;
+}
+
+message GetEventsRequest {
+  optional google.protobuf.Timestamp periodStart = 1;
+  optional google.protobuf.Timestamp periodEnd = 2;
+}

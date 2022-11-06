@@ -9,16 +9,19 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type Storage struct { // TODO
-	db *sqlx.DB
+type Storage struct {
+	db      *sqlx.DB
+	timeout time.Duration
 }
 
-func New() *Storage {
-	return &Storage{}
+func New(timeout time.Duration) *Storage {
+	return &Storage{
+		timeout: timeout,
+	}
 }
 
 func (s *Storage) Connect(ctx context.Context, datasource string, maxConnections int) error {
-	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 	db, err := sqlx.ConnectContext(ctx, "postgres", datasource)
 	db.SetMaxOpenConns(maxConnections)
@@ -26,18 +29,19 @@ func (s *Storage) Connect(ctx context.Context, datasource string, maxConnections
 	return err
 }
 
-func (s *Storage) Close(ctx context.Context) error {
+func (s *Storage) Close() error {
 	err := s.db.Close()
 	return err
 }
 
 func (s *Storage) AddEvent(event storage.Event) (storage.Event, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 	defer cancel()
 
 	sql := `
 		INSERT INTO events (title, date_start, duration, description, user_id, notification_period)
 		VALUES (:title, :date_start, :duration, :description, :user_id, :notification_period)
+		RETURNING *
 	`
 
 	row, err := s.db.NamedQueryContext(ctx, sql, event)
@@ -46,31 +50,37 @@ func (s *Storage) AddEvent(event storage.Event) (storage.Event, error) {
 	}
 	defer row.Close()
 
-	err = row.Scan(event)
+	row.Next()
+	err = row.StructScan(&event)
+
 	return event, err
 }
 
-func (s *Storage) DeleteEvent(id uuid.UUID) (storage.Event, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+func (s *Storage) DeleteEventByID(id uuid.UUID) (storage.Event, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 	defer cancel()
 
 	var event storage.Event
 
+	// Delete event and return this event data
 	sql := "DELETE FROM events WHERE id = :id RETURNING *"
 
-	row, err := s.db.NamedQueryContext(ctx, sql, event)
+	row, err := s.db.NamedQueryContext(ctx, sql, map[string]interface{}{
+		"id": id,
+	})
 	if err != nil {
 		return event, err
 	}
 	defer row.Close()
 
-	err = row.Scan(event)
+	row.Next()
+	err = row.StructScan(&event)
 
 	return event, err
 }
 
 func (s *Storage) UpdateEventByID(event storage.Event) (storage.Event, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 	defer cancel()
 
 	sql := `
@@ -82,6 +92,7 @@ func (s *Storage) UpdateEventByID(event storage.Event) (storage.Event, error) {
 		    user_id = :user_id,
 		    notification_period = :notification_period
 		WHERE id = :id
+		RETURNING *
 	`
 
 	row, err := s.db.NamedQueryContext(ctx, sql, event)
@@ -90,33 +101,36 @@ func (s *Storage) UpdateEventByID(event storage.Event) (storage.Event, error) {
 	}
 	defer row.Close()
 
-	err = row.Scan(event)
+	row.Next()
+	err = row.StructScan(&event)
 
 	return event, err
 }
 
 func (s *Storage) GetEventByID(id uuid.UUID) (storage.Event, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 	defer cancel()
 
 	var event storage.Event
 
 	sql := "SELECT * FROM events WHERE id = :id"
 
-	rows, err := s.db.NamedQueryContext(ctx, sql, map[string]uuid.UUID{
+	row, err := s.db.NamedQueryContext(ctx, sql, map[string]interface{}{
 		"id": id,
 	})
 	if err != nil {
 		return event, err
 	}
-	defer rows.Close()
+	defer row.Close()
 
-	err = rows.Scan(event)
+	row.Next()
+	err = row.StructScan(&event)
+
 	return event, err
 }
 
 func (s *Storage) GetEvents() ([]storage.Event, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 	defer cancel()
 
 	events := make([]storage.Event, 0)
@@ -143,17 +157,17 @@ func (s *Storage) GetEvents() ([]storage.Event, error) {
 	return events, err
 }
 
-func (s *Storage) GetEventsForPeriod(dateStart time.Time, duration time.Duration) ([]storage.Event, error) {
+func (s *Storage) GetEventsForPeriod(startPeriod time.Time, endPeriod time.Time) ([]storage.Event, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	events := make([]storage.Event, 0)
 
-	sql := "SELECT * FROM events WHERE date_start >= :start AND date_start + duration < :end"
+	sql := "SELECT * FROM events WHERE date_start >= :start AND date_start < :end"
 
-	rows, err := s.db.NamedQueryContext(ctx, sql, map[string]int64{
-		"start": dateStart.Unix(),
-		"end":   dateStart.Add(duration).Unix(),
+	rows, err := s.db.NamedQueryContext(ctx, sql, map[string]interface{}{
+		"start": startPeriod,
+		"end":   endPeriod,
 	})
 	if err != nil {
 		return events, err

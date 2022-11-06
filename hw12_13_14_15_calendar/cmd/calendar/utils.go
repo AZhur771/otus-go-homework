@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"time"
 
 	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/app"
 	inmemorystorage "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/storage/memory"
@@ -14,18 +15,18 @@ import (
 )
 
 func getStorage(dbConf DatabaseConf) (app.Storage, error) {
-	if dbConf.MemoryStorage == "sql" {
-		storage := sqlstorage.New()
+	if dbConf.StorageType == "sql" {
+		storage := sqlstorage.New(time.Duration(dbConf.DBTimeout) * time.Millisecond)
 		ctx := context.Background()
 		datasource := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 			dbConf.Host, dbConf.Port, dbConf.Username, dbConf.Password, dbConf.DBName, dbConf.SslMode)
 		err := storage.Connect(ctx, datasource, dbConf.MaxConnections)
 		return storage, err
-	} else if dbConf.MemoryStorage == "inmemory" {
+	} else if dbConf.StorageType == "inmemory" {
 		return inmemorystorage.New(), nil
 	}
 
-	log.Fatalf(fmt.Sprintf("unknown storage type: %s", dbConf.MemoryStorage))
+	log.Fatalf(fmt.Sprintf("unknown storage type: %s", dbConf.StorageType))
 	return nil, nil
 }
 

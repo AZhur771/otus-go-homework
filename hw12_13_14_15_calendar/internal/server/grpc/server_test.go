@@ -44,6 +44,7 @@ func generateDummyEvent(title string, desc string, addToDate storage.PqDuration)
 		Description:        desc,
 		UserID:             userUUID,
 		NotificationPeriod: storage.PqDuration(time.Hour * 12),
+		Sent:               false,
 	}
 
 	return
@@ -93,7 +94,7 @@ func (s *ServerTestSuite) TestUpdateEvent() {
 	eventID := events[0].ID
 	userID := events[0].UserID
 
-	req := &eventpb.Event{
+	req := &eventpb.UpdateEventByIDRequest{
 		Id:                 eventID.String(),
 		UserId:             userID.String(),
 		Title:              "new title",

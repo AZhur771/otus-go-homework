@@ -33,8 +33,11 @@ type Consumer interface {
 type Storage interface {
 	AddEvent(event storage.Event) (storage.Event, error)
 	DeleteEventByID(id uuid.UUID) (storage.Event, error)
+	DeleteScheduledEvents(deletePeriod time.Time) ([]storage.Event, error)
 	UpdateEventByID(event storage.Event) (storage.Event, error)
 	GetEventByID(id uuid.UUID) (storage.Event, error)
 	GetEvents() ([]storage.Event, error)
 	GetEventsForPeriod(periodStart time.Time, periodEnd time.Time) ([]storage.Event, error)
+	GetScheduledEvents(scanPeriod time.Time) ([]storage.Event, error)
+	MarkEventsAsSent(ids []uuid.UUID) error
 }

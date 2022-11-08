@@ -24,14 +24,12 @@ import (
 )
 
 // Suppress "imported and not used" errors
-var (
-	_ codes.Code
-	_ io.Reader
-	_ status.Status
-	_ = runtime.String
-	_ = utilities.NewDoubleArray
-	_ = metadata.Join
-)
+var _ codes.Code
+var _ io.Reader
+var _ status.Status
+var _ = runtime.String
+var _ = utilities.NewDoubleArray
+var _ = metadata.Join
 
 func request_EventService_AddEvent_0(ctx context.Context, marshaler runtime.Marshaler, client EventServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq AddEventRequest
@@ -47,6 +45,7 @@ func request_EventService_AddEvent_0(ctx context.Context, marshaler runtime.Mars
 
 	msg, err := client.AddEvent(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
+
 }
 
 func local_request_EventService_AddEvent_0(ctx context.Context, marshaler runtime.Marshaler, server EventServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
@@ -63,6 +62,7 @@ func local_request_EventService_AddEvent_0(ctx context.Context, marshaler runtim
 
 	msg, err := server.AddEvent(ctx, &protoReq)
 	return msg, metadata, err
+
 }
 
 func request_EventService_DeleteEventByID_0(ctx context.Context, marshaler runtime.Marshaler, client EventServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
@@ -96,6 +96,7 @@ func request_EventService_DeleteEventByID_0(ctx context.Context, marshaler runti
 
 	msg, err := client.DeleteEventByID(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
+
 }
 
 func local_request_EventService_DeleteEventByID_0(ctx context.Context, marshaler runtime.Marshaler, server EventServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
@@ -129,10 +130,11 @@ func local_request_EventService_DeleteEventByID_0(ctx context.Context, marshaler
 
 	msg, err := server.DeleteEventByID(ctx, &protoReq)
 	return msg, metadata, err
+
 }
 
 func request_EventService_UpdateEventByID_0(ctx context.Context, marshaler runtime.Marshaler, client EventServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq Event
+	var protoReq UpdateEventByIDRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -162,10 +164,11 @@ func request_EventService_UpdateEventByID_0(ctx context.Context, marshaler runti
 
 	msg, err := client.UpdateEventByID(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
+
 }
 
 func local_request_EventService_UpdateEventByID_0(ctx context.Context, marshaler runtime.Marshaler, server EventServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq Event
+	var protoReq UpdateEventByIDRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -195,6 +198,7 @@ func local_request_EventService_UpdateEventByID_0(ctx context.Context, marshaler
 
 	msg, err := server.UpdateEventByID(ctx, &protoReq)
 	return msg, metadata, err
+
 }
 
 func request_EventService_GetEventByID_0(ctx context.Context, marshaler runtime.Marshaler, client EventServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
@@ -220,6 +224,7 @@ func request_EventService_GetEventByID_0(ctx context.Context, marshaler runtime.
 
 	msg, err := client.GetEventByID(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
+
 }
 
 func local_request_EventService_GetEventByID_0(ctx context.Context, marshaler runtime.Marshaler, server EventServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
@@ -245,9 +250,12 @@ func local_request_EventService_GetEventByID_0(ctx context.Context, marshaler ru
 
 	msg, err := server.GetEventByID(ctx, &protoReq)
 	return msg, metadata, err
+
 }
 
-var filter_EventService_GetEvents_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+var (
+	filter_EventService_GetEvents_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+)
 
 func request_EventService_GetEvents_0(ctx context.Context, marshaler runtime.Marshaler, client EventServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetEventsRequest
@@ -262,6 +270,7 @@ func request_EventService_GetEvents_0(ctx context.Context, marshaler runtime.Mar
 
 	msg, err := client.GetEvents(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
+
 }
 
 func local_request_EventService_GetEvents_0(ctx context.Context, marshaler runtime.Marshaler, server EventServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
@@ -277,6 +286,7 @@ func local_request_EventService_GetEvents_0(ctx context.Context, marshaler runti
 
 	msg, err := server.GetEvents(ctx, &protoReq)
 	return msg, metadata, err
+
 }
 
 // RegisterEventServiceHandlerServer registers the http handlers for service EventService to "mux".
@@ -284,6 +294,7 @@ func local_request_EventService_GetEvents_0(ctx context.Context, marshaler runti
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
 // Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterEventServiceHandlerFromEndpoint instead.
 func RegisterEventServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server EventServiceServer) error {
+
 	mux.Handle("POST", pattern_EventService_AddEvent_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -306,6 +317,7 @@ func RegisterEventServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		}
 
 		forward_EventService_AddEvent_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
 	})
 
 	mux.Handle("DELETE", pattern_EventService_DeleteEventByID_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
@@ -330,6 +342,7 @@ func RegisterEventServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		}
 
 		forward_EventService_DeleteEventByID_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
 	})
 
 	mux.Handle("PUT", pattern_EventService_UpdateEventByID_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
@@ -354,6 +367,7 @@ func RegisterEventServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		}
 
 		forward_EventService_UpdateEventByID_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
 	})
 
 	mux.Handle("GET", pattern_EventService_GetEventByID_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
@@ -378,6 +392,7 @@ func RegisterEventServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		}
 
 		forward_EventService_GetEventByID_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
 	})
 
 	mux.Handle("GET", pattern_EventService_GetEvents_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
@@ -402,6 +417,7 @@ func RegisterEventServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		}
 
 		forward_EventService_GetEvents_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
 	})
 
 	return nil
@@ -444,6 +460,7 @@ func RegisterEventServiceHandler(ctx context.Context, mux *runtime.ServeMux, con
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
 // "EventServiceClient" to call the correct interceptors.
 func RegisterEventServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client EventServiceClient) error {
+
 	mux.Handle("POST", pattern_EventService_AddEvent_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -463,6 +480,7 @@ func RegisterEventServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		}
 
 		forward_EventService_AddEvent_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
 	})
 
 	mux.Handle("DELETE", pattern_EventService_DeleteEventByID_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
@@ -484,6 +502,7 @@ func RegisterEventServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		}
 
 		forward_EventService_DeleteEventByID_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
 	})
 
 	mux.Handle("PUT", pattern_EventService_UpdateEventByID_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
@@ -505,6 +524,7 @@ func RegisterEventServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		}
 
 		forward_EventService_UpdateEventByID_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
 	})
 
 	mux.Handle("GET", pattern_EventService_GetEventByID_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
@@ -526,6 +546,7 @@ func RegisterEventServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		}
 
 		forward_EventService_GetEventByID_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
 	})
 
 	mux.Handle("GET", pattern_EventService_GetEvents_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
@@ -547,6 +568,7 @@ func RegisterEventServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		}
 
 		forward_EventService_GetEvents_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
 	})
 
 	return nil

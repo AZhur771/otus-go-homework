@@ -98,8 +98,15 @@ func main() {
 
 	logg.Info("scheduler is up and running")
 
-	if err = schedulr.Run(ctx); err != nil {
-		logg.Error(fmt.Sprintf("scheduler failed: %s", err))
+	go func() {
+		if err = schedulr.RunDeleter(ctx); err != nil {
+			logg.Error(fmt.Sprintf("scheduler failed to run deleter: %s", err))
+			cancel()
+		}
+	}()
+
+	if err = schedulr.RunNotifier(ctx); err != nil {
+		logg.Error(fmt.Sprintf("scheduler failed to run notifier: %s", err))
 		cancel()
 	}
 }

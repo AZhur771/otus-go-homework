@@ -55,9 +55,11 @@ func (s *Scheduler) ScanDatabaseForNotifier(ctx context.Context) (int, error) {
 		}
 	}
 
-	err = s.storage.MarkEventsAsSent(sentEventIds)
-	if err != nil {
-		return 0, fmt.Errorf("failed to mark events as sent: %w", err)
+	if len(sentEventIds) > 0 {
+		err = s.storage.MarkEventsAsSent(sentEventIds)
+		if err != nil {
+			return 0, fmt.Errorf("failed to mark events as sent: %w", err)
+		}
 	}
 
 	return len(sentEventIds), nil

@@ -79,6 +79,36 @@ func (s *Storage) DeleteEventByID(id uuid.UUID) (storage.Event, error) {
 	return event, err
 }
 
+func (s *Storage) DeleteScheduledEvents(deletePeriod time.Time) ([]storage.Event, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
+	defer cancel()
+
+	deletedEvents := make([]storage.Event, 0)
+
+	sql := "DELETE FROM events WHERE date_start <= :delete_period AND sent = true RETURNING *"
+
+	rows, err := s.db.NamedQueryContext(ctx, sql, map[string]interface{}{
+		"delete_period": deletePeriod,
+	})
+	if err != nil {
+		return deletedEvents, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var event storage.Event
+
+		err := rows.StructScan(&event)
+		if err != nil {
+			return deletedEvents, err
+		}
+
+		deletedEvents = append(deletedEvents, event)
+	}
+
+	return deletedEvents, nil
+}
+
 func (s *Storage) UpdateEventByID(event storage.Event) (storage.Event, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 	defer cancel()
@@ -158,7 +188,7 @@ func (s *Storage) GetEvents() ([]storage.Event, error) {
 }
 
 func (s *Storage) GetEventsForPeriod(startPeriod time.Time, endPeriod time.Time) ([]storage.Event, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 	defer cancel()
 
 	events := make([]storage.Event, 0)
@@ -186,4 +216,53 @@ func (s *Storage) GetEventsForPeriod(startPeriod time.Time, endPeriod time.Time)
 	}
 
 	return events, err
+}
+
+func (s *Storage) GetScheduledEvents(scanPeriod time.Time) ([]storage.Event, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
+	defer cancel()
+
+	events := make([]storage.Event, 0)
+
+	sql := "SELECT * FROM events WHERE date_start - notification_period <= :scan_period AND sent = false"
+
+	rows, err := s.db.NamedQueryContext(ctx, sql, map[string]interface{}{
+		"scan_period": scanPeriod,
+	})
+	if err != nil {
+		return events, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var event storage.Event
+
+		err := rows.StructScan(&event)
+		if err != nil {
+			return events, err
+		}
+
+		events = append(events, event)
+	}
+
+	return events, err
+}
+
+func (s *Storage) MarkEventsAsSent(ids []uuid.UUID) error {
+	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
+	defer cancel()
+
+	query, args, err := sqlx.In("UPDATE events SET sent = true WHERE id IN (?)", ids)
+	if err != nil {
+		return err
+	}
+
+	query = s.db.Rebind(query)
+	rows, err := s.db.QueryxContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	return nil
 }

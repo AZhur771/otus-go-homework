@@ -134,7 +134,7 @@ func local_request_EventService_DeleteEventByID_0(ctx context.Context, marshaler
 }
 
 func request_EventService_UpdateEventByID_0(ctx context.Context, marshaler runtime.Marshaler, client EventServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq Event
+	var protoReq UpdateEventByIDRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -168,7 +168,7 @@ func request_EventService_UpdateEventByID_0(ctx context.Context, marshaler runti
 }
 
 func local_request_EventService_UpdateEventByID_0(ctx context.Context, marshaler runtime.Marshaler, server EventServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq Event
+	var protoReq UpdateEventByIDRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)

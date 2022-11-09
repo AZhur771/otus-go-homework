@@ -24,7 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type EventServiceClient interface {
 	AddEvent(ctx context.Context, in *AddEventRequest, opts ...grpc.CallOption) (*AddEventResponse, error)
 	DeleteEventByID(ctx context.Context, in *DeleteEventByIDRequest, opts ...grpc.CallOption) (*DeleteEventByIDResponse, error)
-	UpdateEventByID(ctx context.Context, in *Event, opts ...grpc.CallOption) (*UpdateEventByIDResponse, error)
+	UpdateEventByID(ctx context.Context, in *UpdateEventByIDRequest, opts ...grpc.CallOption) (*UpdateEventByIDResponse, error)
 	GetEventByID(ctx context.Context, in *GetEventByIDRequest, opts ...grpc.CallOption) (*Event, error)
 	GetEvents(ctx context.Context, in *GetEventsRequest, opts ...grpc.CallOption) (*Events, error)
 }
@@ -55,7 +55,7 @@ func (c *eventServiceClient) DeleteEventByID(ctx context.Context, in *DeleteEven
 	return out, nil
 }
 
-func (c *eventServiceClient) UpdateEventByID(ctx context.Context, in *Event, opts ...grpc.CallOption) (*UpdateEventByIDResponse, error) {
+func (c *eventServiceClient) UpdateEventByID(ctx context.Context, in *UpdateEventByIDRequest, opts ...grpc.CallOption) (*UpdateEventByIDResponse, error) {
 	out := new(UpdateEventByIDResponse)
 	err := c.cc.Invoke(ctx, "/event.EventService/UpdateEventByID", in, out, opts...)
 	if err != nil {
@@ -88,7 +88,7 @@ func (c *eventServiceClient) GetEvents(ctx context.Context, in *GetEventsRequest
 type EventServiceServer interface {
 	AddEvent(context.Context, *AddEventRequest) (*AddEventResponse, error)
 	DeleteEventByID(context.Context, *DeleteEventByIDRequest) (*DeleteEventByIDResponse, error)
-	UpdateEventByID(context.Context, *Event) (*UpdateEventByIDResponse, error)
+	UpdateEventByID(context.Context, *UpdateEventByIDRequest) (*UpdateEventByIDResponse, error)
 	GetEventByID(context.Context, *GetEventByIDRequest) (*Event, error)
 	GetEvents(context.Context, *GetEventsRequest) (*Events, error)
 	mustEmbedUnimplementedEventServiceServer()
@@ -104,7 +104,7 @@ func (UnimplementedEventServiceServer) AddEvent(context.Context, *AddEventReques
 func (UnimplementedEventServiceServer) DeleteEventByID(context.Context, *DeleteEventByIDRequest) (*DeleteEventByIDResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteEventByID not implemented")
 }
-func (UnimplementedEventServiceServer) UpdateEventByID(context.Context, *Event) (*UpdateEventByIDResponse, error) {
+func (UnimplementedEventServiceServer) UpdateEventByID(context.Context, *UpdateEventByIDRequest) (*UpdateEventByIDResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateEventByID not implemented")
 }
 func (UnimplementedEventServiceServer) GetEventByID(context.Context, *GetEventByIDRequest) (*Event, error) {
@@ -163,7 +163,7 @@ func _EventService_DeleteEventByID_Handler(srv interface{}, ctx context.Context,
 }
 
 func _EventService_UpdateEventByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Event)
+	in := new(UpdateEventByIDRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -175,7 +175,7 @@ func _EventService_UpdateEventByID_Handler(srv interface{}, ctx context.Context,
 		FullMethod: "/event.EventService/UpdateEventByID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EventServiceServer).UpdateEventByID(ctx, req.(*Event))
+		return srv.(EventServiceServer).UpdateEventByID(ctx, req.(*UpdateEventByIDRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

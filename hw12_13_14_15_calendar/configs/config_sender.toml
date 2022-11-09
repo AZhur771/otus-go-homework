@@ -1,0 +1,17 @@
+# Example config
+
+[logger]
+level = "info"
+
+[rabbitmq]
+host = "localhost"
+port = 5672
+username = "admin"
+password = "admin"
+exchange = "calendar-test"
+exchange_type = "direct"
+queue = "calendar-test-queue"
+consumer_tag = "calendar-consumer"
+binding_key = "calendar-test-key"
+reliable = true
+persistent = true

@@ -46,7 +46,7 @@ service EventService {
     };
   };
 
-  rpc UpdateEventByID(Event) returns (UpdateEventByIDResponse) {
+  rpc UpdateEventByID(UpdateEventByIDRequest) returns (UpdateEventByIDResponse) {
     option (google.api.http) = {
       put: "/api/events/{id}"
       body: "*"
@@ -85,10 +85,11 @@ message Event {
   string id = 1;
   string user_id = 2;
   string title = 3;
-  string Description = 4;
+  string description = 4;
   google.protobuf.Timestamp date_start = 5;
   google.protobuf.Duration duration = 6;
   google.protobuf.Duration notification_period = 7;
+  bool sent = 8;
 }
 
 message Events {
@@ -98,7 +99,7 @@ message Events {
 message AddEventRequest {
   string user_id = 1;
   string title = 2;
-  string Description = 3;
+  string description = 3;
   google.protobuf.Timestamp date_start = 4;
   google.protobuf.Duration duration = 5;
   google.protobuf.Duration notification_period = 6;
@@ -110,6 +111,16 @@ message AddEventResponse {
 
 message DeleteEventByIDRequest {
   string id = 1;
+}
+
+message UpdateEventByIDRequest {
+  string id = 1;
+  string user_id = 2;
+  string title = 3;
+  string description = 4;
+  google.protobuf.Timestamp date_start = 5;
+  google.protobuf.Duration duration = 6;
+  google.protobuf.Duration notification_period = 7;
 }
 
 message UpdateEventByIDResponse {

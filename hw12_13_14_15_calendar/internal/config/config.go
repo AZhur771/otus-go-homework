@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/logger"
@@ -8,13 +8,25 @@ import (
 // Организация конфига в main принуждает нас сужать API компонентов, использовать
 // при их конструировании только необходимые параметры, а также уменьшает вероятность циклической зависимости.
 type Config struct {
-	Logger   LoggerConf
-	Server   ServerConf
-	Database DatabaseConf
+	Logger   LoggerConf   `toml:"logger"`
+	Server   ServerConf   `toml:"server"`
+	Database DatabaseConf `toml:"database"`
+}
+
+type SchedulerConfig struct {
+	Logger    LoggerConf    `toml:"logger"`
+	Scheduler SchedulerConf `toml:"scheduler"`
+	Database  DatabaseConf  `toml:"database"`
+	RabbitMQ  RabbitMQConf  `toml:"rabbitmq"`
+}
+
+type SenderConfig struct {
+	Logger   LoggerConf   `toml:"logger"`
+	RabbitMQ RabbitMQConf `toml:"rabbitmq"`
 }
 
 type LoggerConf struct {
-	Level logger.Level
+	Level logger.Level `toml:"level"`
 }
 
 type ServerConf struct {
@@ -22,6 +34,25 @@ type ServerConf struct {
 	Port            int    `toml:"port"`
 	GatewayPort     int    `toml:"gateway_port"`
 	ShutdownTimeout int    `toml:"shutdown_timeout"`
+}
+
+type SchedulerConf struct {
+	ScanPeriod   int `toml:"scan_period"`
+	DeletePeriod int `toml:"delete_period"`
+}
+
+type RabbitMQConf struct {
+	Host         string `toml:"host"`
+	Port         int    `toml:"port"`
+	Username     string `toml:"username"`
+	Password     string `toml:"password"`
+	Exchange     string `toml:"exchange"`
+	ExchangeType string `toml:"exchange_type"`
+	Queue        string `toml:"queue"`
+	ConsumerTag  string `toml:"consumer_tag"`
+	BindingKey   string `toml:"binding_key"`
+	Reliable     bool   `toml:"reliable"`
+	Persistent   bool   `toml:"persistent"`
 }
 
 type DatabaseConf struct {
@@ -38,4 +69,12 @@ type DatabaseConf struct {
 
 func NewConfig() Config {
 	return Config{}
+}
+
+func NewSchedulerConfig() SchedulerConfig {
+	return SchedulerConfig{}
+}
+
+func NewSenderConfig() SenderConfig {
+	return SenderConfig{}
 }

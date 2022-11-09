@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"os/signal"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	eventpb "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/api/stubs"
+	config "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/config"
 	"github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/logger"
 	internalgrpc "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/server/grpc"
 	internalhttp "github.com/AZhur771/otus-go-homework/hw12_13_14_15_calendar/internal/server/http"
@@ -32,44 +34,40 @@ func main() {
 		return
 	}
 
-	config, err := getConfig(configFile)
+	calendarConfig, err := config.GetConfig(configFile)
 	if err != nil {
-		fmt.Printf("error while getting config: %v\n", err)
-		return
+		log.Fatalf("error while getting config: %s", err)
 	}
 
-	storage, err := getStorage(config.Database)
+	calendarStorage, err := config.GetStorage(calendarConfig.Database)
 	if err != nil {
-		fmt.Printf("error while getting storage: %v\n", err)
-		return
+		log.Fatalf("error while getting storage: %s", err)
 	}
 
-	logg := logger.New(config.Logger.Level)
+	logg := logger.New(calendarConfig.Logger.Level)
 
 	grpcClientConn, err := internalgrpc.NewClientConn(
 		context.Background(),
-		config.Server.Host,
-		config.Server.Port,
+		calendarConfig.Server.Host,
+		calendarConfig.Server.Port,
 	)
 	if err != nil {
-		fmt.Printf("error while instantiating grpc client connection: %v\n", err)
-		return
+		log.Fatalf("error while instantiating grpc client connection: %s", err)
 	}
 
 	grpcGWServer, err := internalhttp.NewServer(
 		context.Background(),
 		logg,
-		config.Server.Host,
-		config.Server.GatewayPort,
+		calendarConfig.Server.Host,
+		calendarConfig.Server.GatewayPort,
 		grpcClientConn,
 	)
 	if err != nil {
-		fmt.Printf("error while instantiating grpc gateway server: %v\n", err)
-		return
+		log.Fatalf("error while instantiating grpc gateway server: %s", err)
 	}
 
 	grpcServer := grpc.NewServer()
-	eventpb.RegisterEventServiceServer(grpcServer, internalgrpc.NewServer(storage, logg))
+	eventpb.RegisterEventServiceServer(grpcServer, internalgrpc.NewServer(calendarStorage, logg))
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
@@ -87,7 +85,7 @@ func main() {
 
 		ctx, cancel := context.WithTimeout(
 			context.Background(),
-			time.Duration(config.Server.ShutdownTimeout)*time.Millisecond,
+			time.Duration(calendarConfig.Server.ShutdownTimeout)*time.Millisecond,
 		)
 		defer cancel()
 
@@ -100,9 +98,10 @@ func main() {
 	}()
 
 	logg.Info("grpc server is up and running")
-	logg.Info(fmt.Sprintf("http server is up and running at http://%s:%d", config.Server.Host, config.Server.GatewayPort))
+	logg.Info(fmt.Sprintf("http server is up and running at http://%s:%d",
+		calendarConfig.Server.Host, calendarConfig.Server.GatewayPort))
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", config.Server.Host, config.Server.Port))
+	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", calendarConfig.Server.Host, calendarConfig.Server.Port))
 	if err != nil {
 		logg.Error("failed to get tcp listener: " + err.Error())
 		cancel()

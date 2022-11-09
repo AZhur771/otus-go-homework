@@ -198,7 +198,7 @@
                 "title": {
                   "type": "string"
                 },
-                "Description": {
+                "description": {
                   "type": "string"
                 },
                 "dateStart": {
@@ -231,7 +231,7 @@
         "title": {
           "type": "string"
         },
-        "Description": {
+        "description": {
           "type": "string"
         },
         "dateStart": {
@@ -269,7 +269,7 @@
         "title": {
           "type": "string"
         },
-        "Description": {
+        "description": {
           "type": "string"
         },
         "dateStart": {
@@ -281,6 +281,9 @@
         },
         "notificationPeriod": {
           "type": "string"
+        },
+        "sent": {
+          "type": "boolean"
         }
       }
     },

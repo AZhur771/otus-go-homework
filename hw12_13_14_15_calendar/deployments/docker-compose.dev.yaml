@@ -13,7 +13,6 @@ services:
       - POSTGRES_DB=calendar
     networks:
       - postgres
-    restart: unless-stopped
 
   pgadmin:
     links:
@@ -31,14 +30,32 @@ services:
       - postgres
     depends_on:
       - postgres
-    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    volumes:
+      - rabbitmqdata:/var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+    networks:
+      - rabbitmq
 
 networks:
   postgres:
+    driver: bridge
+  rabbitmq:
     driver: bridge
 
 volumes:
   pgdata:
     driver: local
   pgadmindata:
+    driver: local
+  rabbitmqdata:
     driver: local

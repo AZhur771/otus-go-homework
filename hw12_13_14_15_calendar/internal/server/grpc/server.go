@@ -78,7 +78,7 @@ func (e EventServiceServerImpl) DeleteEventByID(
 
 func (e EventServiceServerImpl) UpdateEventByID(
 	ctx context.Context,
-	request *eventpb.Event,
+	request *eventpb.UpdateEventByIDRequest,
 ) (*eventpb.UpdateEventByIDResponse, error) {
 	eventID, err := uuid.Parse(request.GetId())
 	if err != nil {
@@ -130,6 +130,7 @@ func (e EventServiceServerImpl) GetEventByID(
 		DateStart:          timestamppb.New(event.DateStart),
 		Duration:           durationpb.New(time.Duration(event.Duration)),
 		NotificationPeriod: durationpb.New(time.Duration(event.NotificationPeriod)),
+		Sent:               event.Sent,
 	}, nil
 }
 
@@ -171,6 +172,7 @@ func (e EventServiceServerImpl) GetEvents(
 			DateStart:          timestamppb.New(event.DateStart),
 			Duration:           durationpb.New(time.Duration(event.Duration)),
 			NotificationPeriod: durationpb.New(time.Duration(event.NotificationPeriod)),
+			Sent:               event.Sent,
 		})
 	}
 

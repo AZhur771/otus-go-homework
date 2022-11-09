@@ -27,4 +27,7 @@ type Event struct {
 
 	// За сколько времени высылать уведомление
 	NotificationPeriod PqDuration `db:"notification_period"`
+
+	// Было ли сообщение отправлено
+	Sent bool `db:"sent"`
 }

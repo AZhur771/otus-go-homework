@@ -1,7 +1,9 @@
 BIN := "./bin/calendar"
 BIN_SCHEDULER := "./bin/calendar-scheduler"
 BIN_SENDER := "./bin/calendar-sender"
-DOCKER_IMG="calendar:develop"
+DOCKER_IMG := "calendar:develop"
+
+DOCKER_CALENDAR_CONFIG_DIR := "$(shell pwd)/deployments/configs/"
 
 GIT_HASH := $(shell git log --format="%h" -n 1)
 LDFLAGS := -X main.release="develop" -X main.buildDate=$(shell date -u +%Y-%m-%dT%H:%M:%S) -X main.gitHash=$(GIT_HASH)
@@ -56,4 +58,11 @@ migrate:
 go-version:
 	which go && go version
 
-.PHONY: build run build-img run-img version test lint migrate
+up:
+	CALENDAR_CONFIG_DIR=$(DOCKER_CALENDAR_CONFIG_DIR) docker compose -f deployments/docker-compose.yaml up -d
+
+down:
+	CALENDAR_CONFIG_DIR=$(DOCKER_CALENDAR_CONFIG_DIR) docker compose -f deployments/docker-compose.yaml down
+
+
+.PHONY: build generate protoc-version run build-img run-img version test lint migrate go-version up down

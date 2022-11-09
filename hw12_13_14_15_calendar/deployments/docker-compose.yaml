@@ -1,1 +1,118 @@
 version: "3"
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    volumes:
+      - pgdata:/data/postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=calendar
+    networks:
+      - postgres
+
+  pgadmin:
+    links:
+      - postgres:postgres
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmindata:/var/lib/pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    networks:
+      - postgres
+    depends_on:
+      - postgres
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    volumes:
+      - rabbitmqdata:/var/lib/rabbitmq
+    ports:
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+    networks:
+      - rabbitmq
+
+  calendar:
+    build:
+      dockerfile: ./build/calendar/Dockerfile
+      context: ./..
+    environment:
+      - CONFIG_FILE=/etc/calendar/config.toml
+    volumes:
+      - ${CALENDAR_CONFIG_DIR}:/etc/calendar/
+    restart: always
+    container_name: calendar
+    ports:
+      - "3000:3000"
+      - "8888:3001"
+    networks:
+      - postgres
+    depends_on:
+      - postgres
+
+  calendar_migrator:
+    build:
+      dockerfile: ./build/calendar_migrator/Dockerfile
+      context: ./..
+    restart: on-failure
+    environment:
+      - GOOSE_DRIVER=postgres
+      - GOOSE_DBSTRING=postgres://postgres:postgres@postgres:5432/calendar?sslmode=disable
+    container_name: calendar_migrator
+    networks:
+      - postgres
+    depends_on:
+      - postgres
+
+  calendar_scheduler:
+    build:
+      dockerfile: ./build/calendar_scheduler/Dockerfile
+      context: ./..
+    volumes:
+      - ${CALENDAR_CONFIG_DIR}:/etc/calendar/
+    restart: always
+    container_name: calendar_scheduler
+    networks:
+      - postgres
+      - rabbitmq
+    depends_on:
+      - postgres
+      - rabbitmq
+
+  calendar_sender:
+    build:
+      dockerfile: ./build/calendar_sender/Dockerfile
+      context: ./..
+    volumes:
+      - ${CALENDAR_CONFIG_DIR}:/etc/calendar/
+    restart: always
+    container_name: calendar_sender
+    networks:
+      - rabbitmq
+    depends_on:
+      - rabbitmq
+
+networks:
+  postgres:
+    driver: bridge
+  rabbitmq:
+    driver: bridge
+
+volumes:
+  pgdata:
+    driver: local
+  pgadmindata:
+    driver: local
+  rabbitmqdata:
+    driver: local

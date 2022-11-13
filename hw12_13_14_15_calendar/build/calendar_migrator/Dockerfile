@@ -1,7 +1,7 @@
 FROM alpine:3.14.0
 
 LABEL ORGANIZATION="OTUS Online Education"
-LABEL SERVICE="calendar-scheduler"
+LABEL SERVICE="calendar-migrator"
 LABEL MAINTAINERS="student@otus.ru"
 
 ENV CODE_DIR /go/src/

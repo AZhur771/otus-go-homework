@@ -72,12 +72,13 @@ func (s *Scheduler) processScanDatabaseForNotifierResult(sent int, err error) {
 func (s *Scheduler) RunNotifier(ctx context.Context) error {
 	t := time.NewTicker(s.scanPeriod)
 	defer t.Stop()
-	for {
-		if s.startImmediate {
-			sent, err := s.ScanDatabaseForNotifier(ctx)
-			s.processScanDatabaseForNotifierResult(sent, err)
-		}
 
+	if s.startImmediate {
+		sent, err := s.ScanDatabaseForNotifier(ctx)
+		s.processScanDatabaseForNotifierResult(sent, err)
+	}
+
+	for {
 		select {
 		case <-t.C:
 			sent, err := s.ScanDatabaseForNotifier(ctx)

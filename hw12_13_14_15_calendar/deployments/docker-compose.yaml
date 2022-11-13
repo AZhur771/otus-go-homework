@@ -49,10 +49,34 @@ services:
       context: ./..
     environment:
       - CONFIG_FILE=/etc/calendar/config.toml
-      - GOOSE_DRIVER=postgres
-      - GOOSE_DBSTRING=postgres://postgres:postgres@postgres:5432/calendar?sslmode=disable
     volumes:
       - ${CALENDAR_CONFIG_DIR}:/etc/calendar/
+    command:
+      - /bin/sh
+      - -c
+      - |
+        while ! nc -z postgres 5432; do
+          echo "waiting for services"
+          sleep 5
+        done
+        echo "waiting for migrations..."
+        sleep 5
+        /opt/calendar/calendar-app -config=/etc/calendar/config.toml
+    restart: always
+    container_name: calendar
+    ports:
+      - "3000:3000"
+      - "8888:3001"
+    networks:
+      - postgres
+    depends_on:
+      - postgres
+
+  calendar_migrator:
+    build:
+      dockerfile: ./build/calendar_migrator/Dockerfile
+      context: ./..
+    restart: on-failure
     command:
       - /bin/sh
       - -c
@@ -62,13 +86,11 @@ services:
           sleep 1
         done
         echo "apply migrations..."
-        /opt/goose -dir ./migrations up
-        /opt/calendar/calendar-app -config=/etc/calendar/config.toml
-    restart: always
-    container_name: calendar
-    ports:
-      - "3000:3000"
-      - "8888:3001"
+        /bin/goose -dir ./migrations up
+    environment:
+      - GOOSE_DRIVER=postgres
+      - GOOSE_DBSTRING=postgres://postgres:postgres@postgres:5432/calendar?sslmode=disable
+    container_name: calendar_migrator
     networks:
       - postgres
     depends_on:
@@ -84,7 +106,7 @@ services:
       - |
         while ! nc -z postgres 5432 && nc -z rabbitmq 5672; do
           echo "waiting for services"
-          sleep 1
+          sleep 5
         done
         echo "waiting for migrations..."
         sleep 5
@@ -112,7 +134,7 @@ services:
       - |
         while ! nc -z postgres 5432 && nc -z rabbitmq 5672; do
           echo "waiting for services"
-          sleep 1
+          sleep 5
         done
         echo "waiting for migrations..."
         sleep 5

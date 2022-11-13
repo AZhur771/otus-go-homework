@@ -1,7 +1,6 @@
 # Собираем в гошке
 FROM golang:1.16.2 as build
 
-ENV BIN_FILE /opt/calendar/calendar-scheduler-app
 ENV CODE_DIR /go/src/
 
 WORKDIR ${CODE_DIR}
@@ -18,7 +17,7 @@ COPY .. ${CODE_DIR}
 ARG LDFLAGS
 RUN CGO_ENABLED=0 go build \
         -ldflags "$LDFLAGS" \
-        -o ${BIN_FILE} cmd/calendar_scheduler/*
+        -o /opt/calendar/calendar-scheduler-app cmd/calendar_scheduler/*
 
 # На выходе тонкий образ
 FROM alpine:3.9

@@ -26,10 +26,31 @@ services:
       context: ./..
     environment:
       - CONFIG_FILE=/etc/calendar/config.toml
-      - GOOSE_DRIVER=postgres
-      - GOOSE_DBSTRING=postgres://postgres:postgres@postgres:5432/calendar?sslmode=disable
     volumes:
       - ${CALENDAR_CONFIG_DIR}:/etc/calendar/
+    command:
+      - /bin/sh
+      - -c
+      - |
+        while ! nc -z postgres 5432; do
+          echo "waiting for services"
+          sleep 5
+        done
+        echo "waiting for migrations..."
+        sleep 5
+        /opt/calendar/calendar-app -config=/etc/calendar/config.toml
+    restart: always
+    container_name: calendar
+    networks:
+      - postgres
+    depends_on:
+      - postgres
+
+  calendar_migrator:
+    build:
+      dockerfile: ./build/calendar_migrator/Dockerfile
+      context: ./..
+    restart: on-failure
     command:
       - /bin/sh
       - -c
@@ -39,10 +60,11 @@ services:
           sleep 1
         done
         echo "apply migrations..."
-        /opt/goose -dir ./migrations up
-        /opt/calendar/calendar-app -config=/etc/calendar/config.toml
-    restart: always
-    container_name: calendar
+        /bin/goose -dir ./migrations up
+    environment:
+      - GOOSE_DRIVER=postgres
+      - GOOSE_DBSTRING=postgres://postgres:postgres@postgres:5432/calendar?sslmode=disable
+    container_name: calendar_migrator
     networks:
       - postgres
     depends_on:
@@ -58,7 +80,7 @@ services:
       - |
         while ! nc -z postgres 5432 && nc -z rabbitmq 5672; do
           echo "waiting for services"
-          sleep 1
+          sleep 5
         done
         echo "waiting for migrations..."
         sleep 5
@@ -86,7 +108,7 @@ services:
       - |
         while ! nc -z postgres 5432 && nc -z rabbitmq 5672; do
           echo "waiting for services"
-          sleep 1
+          sleep 5
         done
         echo "waiting for migrations..."
         sleep 5
@@ -110,7 +132,7 @@ services:
       - /bin/sh
       - -c
       - |
-        wait-go --wait "postgres:5432" --command "echo \"services are up and running\""
+        wait-go -wait "postgres:5432" -interval 5 -command "echo \"services are up and running\""
         echo "waiting for migrations..."
         sleep 5
         go test -tags=integration ./...
@@ -119,9 +141,10 @@ services:
     networks:
       - postgres
     depends_on:
-      - rabbitmq
-      - postgres
       - calendar
+      - calendar_migrator
+      - calendar_scheduler
+      - calendar_sender
 
 networks:
   postgres:

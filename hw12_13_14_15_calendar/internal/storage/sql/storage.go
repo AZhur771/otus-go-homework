@@ -253,10 +253,6 @@ func (s *Storage) MarkEventAsSent(id uuid.UUID) error {
 	defer cancel()
 
 	_, err := s.db.ExecContext(ctx, `UPDATE events SET sent = true WHERE id = $1`, id)
-	if err != nil {
-		return err
-	}
-
 	return err
 }
 

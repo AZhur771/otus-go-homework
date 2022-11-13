@@ -35,12 +35,21 @@ func main() {
 		log.Fatalf("error while getting config: %s", err)
 	}
 
+	if senderConfig.Database.StorageType != "sql" {
+		log.Fatal("for scheduler only sql database is supported")
+	}
+
+	storage, err := config.GetStorage(senderConfig.Database)
+	if err != nil {
+		log.Fatalf("error while getting storage: %s", err)
+	}
+
+	logg := logger.New(senderConfig.Logger.Level)
+
 	conn, err := amqp.Dial(config.GetAMQPURI(senderConfig.RabbitMQ))
 	if err != nil {
 		log.Fatalf("error while dialing RabbitMQ: %s", err)
 	}
-
-	logg := logger.New(senderConfig.Logger.Level)
 
 	consumer, err := config.GetConsumer(conn, logg)
 	if err != nil {
@@ -72,7 +81,7 @@ func main() {
 		os.Exit(1)
 	}()
 
-	sender := sender.New(logg, consumer)
+	sender := sender.New(storage, logg, consumer)
 
 	logg.Info("sender is up and running")
 

@@ -3,6 +3,17 @@
 [logger]
 level = "info"
 
+[database]
+storage_type = "sql" # for scheduler only sql database is available
+host = "postgres"
+port = 5432
+username = "postgres"
+password = "postgres"
+db_name = "calendar"
+ssl_mode = "disable"
+db_timeout = 3000 # ms
+max_connections = 5
+
 [rabbitmq]
 host = "rabbitmq"
 port = 5672

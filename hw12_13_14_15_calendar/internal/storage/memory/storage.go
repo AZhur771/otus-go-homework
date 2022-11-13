@@ -162,6 +162,20 @@ func (s *Storage) GetScheduledEvents(scanPeriod time.Time) ([]storage.Event, err
 	return scheduledEvents, nil
 }
 
+func (s *Storage) MarkEventAsSent(id uuid.UUID) error {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	for i, e := range s.events {
+		if id.String() == e.ID.String() {
+			s.events[i].Sent = true
+			break
+		}
+	}
+
+	return nil
+}
+
 func (s *Storage) MarkEventsAsSent(ids []uuid.UUID) error {
 	s.mu.RLock()
 	defer s.mu.RUnlock()

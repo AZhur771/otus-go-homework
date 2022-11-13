@@ -248,6 +248,18 @@ func (s *Storage) GetScheduledEvents(scanPeriod time.Time) ([]storage.Event, err
 	return events, err
 }
 
+func (s *Storage) MarkEventAsSent(id uuid.UUID) error {
+	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
+	defer cancel()
+
+	_, err := s.db.ExecContext(ctx, `UPDATE events SET sent = true WHERE id = $1`, id)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
 func (s *Storage) MarkEventsAsSent(ids []uuid.UUID) error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 	defer cancel()

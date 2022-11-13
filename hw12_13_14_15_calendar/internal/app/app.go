@@ -39,5 +39,6 @@ type Storage interface {
 	GetEvents() ([]storage.Event, error)
 	GetEventsForPeriod(periodStart time.Time, periodEnd time.Time) ([]storage.Event, error)
 	GetScheduledEvents(scanPeriod time.Time) ([]storage.Event, error)
+	MarkEventAsSent(id uuid.UUID) error
 	MarkEventsAsSent(ids []uuid.UUID) error
 }

@@ -6,6 +6,7 @@ level = "info"
 [scheduler]
 scan_period = 1 # scan db every minute, setting to bigger period results in ineffective scheduler
 delete_period = 525600 # delete events happened 60 * 24 * 365 minutes ago (1 year)
+start_immediate = true # start immediately or wait for `scan_period` minutes
 
 [database]
 storage_type = "sql" # for scheduler only sql database is available

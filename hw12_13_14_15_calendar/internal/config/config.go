@@ -22,6 +22,7 @@ type SchedulerConfig struct {
 
 type SenderConfig struct {
 	Logger   LoggerConf   `toml:"logger"`
+	Database DatabaseConf `toml:"database"`
 	RabbitMQ RabbitMQConf `toml:"rabbitmq"`
 }
 
@@ -37,8 +38,9 @@ type ServerConf struct {
 }
 
 type SchedulerConf struct {
-	ScanPeriod   int `toml:"scan_period"`
-	DeletePeriod int `toml:"delete_period"`
+	ScanPeriod       int  `toml:"scan_period"`
+	DeletePeriod     int  `toml:"delete_period"`
+	StartImmediately bool `toml:"start_immediate"`
 }
 
 type RabbitMQConf struct {

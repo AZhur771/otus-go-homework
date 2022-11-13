@@ -27,10 +27,17 @@ LABEL ORGANIZATION="OTUS Online Education"
 LABEL SERVICE="calendar"
 LABEL MAINTAINERS="student@otus.ru"
 
+ENV BIN_FILE_GOOSE "/opt/goose"
+
+ADD https://github.com/pressly/goose/releases/download/v3.2.0/goose_linux_x86_64 ${BIN_FILE_GOOSE}
+RUN chmod +x ${BIN_FILE_GOOSE}
+
 ENV BIN_FILE "/opt/calendar/calendar-app"
 COPY --from=build ${BIN_FILE} ${BIN_FILE}
+
+COPY ./migrations/ ./migrations/
 
 ENV CONFIG_FILE /etc/calendar/config.toml
 COPY ./configs/config.toml ${CONFIG_FILE}
 
-CMD ${BIN_FILE} -config ${CONFIG_FILE}
+CMD ${BIN_FILE_GOOSE} -dir ./migrations up && ${BIN_FILE} -config ${CONFIG_FILE}

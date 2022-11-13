@@ -46,6 +46,13 @@ version: build
 test:
 	go test -race ./...
 
+integration-tests:
+	CALENDAR_CONFIG_DIR=$(DOCKER_CALENDAR_CONFIG_DIR) docker compose -f deployments/docker-compose.test.yaml build && \
+	CALENDAR_CONFIG_DIR=$(DOCKER_CALENDAR_CONFIG_DIR) docker compose -f deployments/docker-compose.test.yaml up \
+		--remove-orphans \
+		--abort-on-container-exit \
+		--exit-code-from integration_tests
+
 install-lint-deps:
 	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.41.1
 
@@ -59,10 +66,11 @@ go-version:
 	which go && go version
 
 up:
-	CALENDAR_CONFIG_DIR=$(DOCKER_CALENDAR_CONFIG_DIR) docker compose -f deployments/docker-compose.yaml up -d
+	CALENDAR_CONFIG_DIR=$(DOCKER_CALENDAR_CONFIG_DIR) docker compose -f deployments/docker-compose.yaml build && \
+	CALENDAR_CONFIG_DIR=$(DOCKER_CALENDAR_CONFIG_DIR) docker compose -f deployments/docker-compose.yaml up -d --remove-orphans
 
 down:
-	CALENDAR_CONFIG_DIR=$(DOCKER_CALENDAR_CONFIG_DIR) docker compose -f deployments/docker-compose.yaml down
+	CALENDAR_CONFIG_DIR=$(DOCKER_CALENDAR_CONFIG_DIR) docker compose -f deployments/docker-compose.yaml down --remove-orphans
 
 
 .PHONY: build generate protoc-version run build-img run-img version test lint migrate go-version up down

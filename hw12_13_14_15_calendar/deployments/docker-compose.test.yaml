@@ -3,8 +3,6 @@ services:
   postgres:
     container_name: postgres
     image: postgres:latest
-    volumes:
-      - pgdata:/data/postgres
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -12,31 +10,10 @@ services:
     networks:
       - postgres
 
-  pgadmin:
-    links:
-      - postgres:postgres
-    container_name: pgadmin
-    image: dpage/pgadmin4
-    ports:
-      - "8080:80"
-    volumes:
-      - pgadmindata:/var/lib/pgadmin
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
-      - PGADMIN_DEFAULT_PASSWORD=admin
-    networks:
-      - postgres
-    depends_on:
-      - postgres
-
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
     hostname: rabbitmq
-    volumes:
-      - rabbitmqdata:/var/lib/rabbitmq
-    ports:
-      - "15672:15672"
     environment:
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS=admin
@@ -66,9 +43,6 @@ services:
         /opt/calendar/calendar-app -config=/etc/calendar/config.toml
     restart: always
     container_name: calendar
-    ports:
-      - "3000:3000"
-      - "8888:3001"
     networks:
       - postgres
     depends_on:
@@ -126,16 +100,31 @@ services:
       - postgres
       - rabbitmq
 
+  integration_tests:
+    build:
+      dockerfile: ./tests/Dockerfile
+      context: ./..
+    restart: "no"
+    container_name: integration_tests
+    command:
+      - /bin/sh
+      - -c
+      - |
+        wait-go --wait "postgres:5432" --command "echo \"services are up and running\""
+        echo "waiting for migrations..."
+        sleep 5
+        go test -tags=integration ./...
+    environment:
+      - TEST_DATASOURCE=postgres://postgres:postgres@postgres:5432/calendar?sslmode=disable
+    networks:
+      - postgres
+    depends_on:
+      - rabbitmq
+      - postgres
+      - calendar
+
 networks:
   postgres:
     driver: bridge
   rabbitmq:
     driver: bridge
-
-volumes:
-  pgdata:
-    driver: local
-  pgadmindata:
-    driver: local
-  rabbitmqdata:
-    driver: local

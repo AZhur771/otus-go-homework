@@ -3,14 +3,9 @@
 [logger]
 level = "info"
 
-[scheduler]
-scan_period = 1 # scan db every minute, setting to bigger period results in ineffective scheduler
-delete_period = 525600 # delete events happened 60 * 24 * 365 minutes ago (1 year)
-start_immediate = true # start immediately or wait for `scan_period` minutes
-
 [database]
 storage_type = "sql" # for scheduler only sql database is available
-host = "localhost"
+host = "postgres"
 port = 5432
 username = "postgres"
 password = "postgres"
@@ -20,7 +15,7 @@ db_timeout = 3000 # ms
 max_connections = 5
 
 [rabbitmq]
-host = "localhost"
+host = "rabbitmq"
 port = 5672
 username = "admin"
 password = "admin"
@@ -29,5 +24,5 @@ exchange_type = "direct"
 queue = "calendar-test-queue"
 consumer_tag = "calendar-consumer"
 binding_key = "calendar-test-key"
-reliable = true # log message acknowledgements
-persistent = true # persist data (both messages and structures)
+reliable = true
+persistent = true

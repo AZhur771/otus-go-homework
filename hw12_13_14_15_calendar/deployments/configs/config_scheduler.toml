@@ -10,7 +10,7 @@ start_immediate = true # start immediately or wait for `scan_period` minutes
 
 [database]
 storage_type = "sql" # for scheduler only sql database is available
-host = "localhost"
+host = "postgres"
 port = 5432
 username = "postgres"
 password = "postgres"
@@ -20,7 +20,7 @@ db_timeout = 3000 # ms
 max_connections = 5
 
 [rabbitmq]
-host = "localhost"
+host = "rabbitmq"
 port = 5672
 username = "admin"
 password = "admin"

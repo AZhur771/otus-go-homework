@@ -94,6 +94,7 @@ func main() {
 		producer,
 		time.Duration(schedulerConfig.Scheduler.ScanPeriod)*time.Minute,
 		time.Duration(schedulerConfig.Scheduler.DeletePeriod)*time.Minute,
+		schedulerConfig.Scheduler.StartImmediately,
 	)
 
 	logg.Info("scheduler is up and running")

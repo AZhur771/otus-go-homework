@@ -8,15 +8,25 @@ import (
 )
 
 type Sender struct {
+	storage  app.Storage
 	logger   app.Logger
 	consumer app.Consumer
 }
 
-func New(logger app.Logger, consumer app.Consumer) *Sender {
+func New(storage app.Storage, logger app.Logger, consumer app.Consumer) *Sender {
 	return &Sender{
+		storage:  storage,
 		logger:   logger,
 		consumer: consumer,
 	}
+}
+
+func (s *Sender) sendNotification(msg app.Message) error {
+	// There should be some sending notification logic
+	s.logger.Info(fmt.Sprintf("Received message %s for user %s: %s - %s",
+		msg.ID, msg.UserID, msg.Title, msg.Date))
+
+	return nil
 }
 
 func (s *Sender) Run(ctx context.Context) error {
@@ -26,8 +36,13 @@ func (s *Sender) Run(ctx context.Context) error {
 	}
 
 	for msg := range msgs {
-		s.logger.Info(fmt.Sprintf("Received message %s for user %s: %s - %s",
-			msg.ID, msg.UserID, msg.Title, msg.Date))
+		if err = s.sendNotification(msg); err != nil {
+			continue
+		}
+
+		if err = s.storage.MarkEventAsSent(msg.ID); err != nil {
+			s.logger.Error(fmt.Sprintf("failed to mark events as sent: %s", err))
+		}
 	}
 
 	return nil

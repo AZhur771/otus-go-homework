@@ -54,7 +54,7 @@ services:
       - /bin/sh
       - -c
       - |
-        while ! nc -z postgres 5432 && nc -z rabbitmq 5672; do
+        while ! nc -z postgres 5432 || ! nc -z rabbitmq 5672; do
           echo "waiting for services"
           sleep 5
         done
@@ -82,7 +82,7 @@ services:
       - /bin/sh
       - -c
       - |
-        while ! nc -z postgres 5432 && nc -z rabbitmq 5672; do
+        while ! nc -z postgres 5432 || ! nc -z rabbitmq 5672; do
           echo "waiting for services"
           sleep 5
         done
